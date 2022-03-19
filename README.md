@@ -1,5 +1,6 @@
 # Sistema gestão de produtos com laravel framework
 
+Disponivel em http://mekkocopos.juanfariasprogramador.com.br
 
 ![image](https://user-images.githubusercontent.com/49367122/159099358-8cb123c2-4ed5-4bdd-87fb-9c8686a859f9.png)
 ![image](https://user-images.githubusercontent.com/49367122/159099321-e634a96f-5030-48bc-a371-6eab952c3eba.png)
