@@ -1,4 +1,4 @@
-# Sistema gestão de produtos com laravel framework
+# Sistema de controle de estoque com laravel framework
 
 Disponivel em http://crmekkocopos.juanfariasprogramador.com.br
 
