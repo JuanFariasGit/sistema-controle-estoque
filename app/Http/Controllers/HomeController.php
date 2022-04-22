@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\ProductMovement;
+use App\MovementProduct;
 
 class HomeController extends Controller
 {
@@ -11,18 +11,18 @@ class HomeController extends Controller
     {
         $this->middleware(['auth', 'verified']);
     }
-   
+
     public function index(Request $request)
     {
-        $productMovementEntry = ProductMovement::select('products.name', 'product_movements.quantity')
-        ->join('movements', 'product_movements.movement_id', 'movements.id')
-        ->join('products', 'product_movements.product_id', 'products.id')->where('movements.type', 'entry')
-        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'product_movements.quantity')->get();
+        $productMovementEntry = MovementProduct::select('products.name', 'movement_products.quantity')
+        ->join('movements', 'movement_products.movement_id', 'movements.id')
+        ->join('products', 'movement_products.product_id', 'products.id')->where('movements.type', 'entry')
+        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'movement_products.quantity')->get();
 
-        $productMovementExit = ProductMovement::select('products.name', 'product_movements.quantity')
-        ->join('movements', 'product_movements.movement_id', 'movements.id')
-        ->join('products', 'product_movements.product_id', 'products.id')->where('movements.type', 'exit')
-        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'product_movements.quantity')->get();
+        $productMovementExit = MovementProduct::select('products.name', 'movement_products.quantity')
+        ->join('movements', 'movement_products.movement_id', 'movements.id')
+        ->join('products', 'movement_products.product_id', 'products.id')->where('movements.type', 'exit')
+        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'movement_products.quantity')->get();
 
         $entryPie = [];
         $entryTotal = 0;

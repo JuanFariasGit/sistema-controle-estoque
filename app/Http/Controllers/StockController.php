@@ -3,47 +3,48 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\MovementRequest;
 use App\Movement;
 use App\Product;
-use App\ProductMovement;
+use App\MovementProduct;
+use App\User;
 use Illuminate\Support\Facades\Validator;
 
 class StockController extends Controller
 {
-    public function __construct() 
+    public function __construct()
     {
         $this->middleware(['auth', 'verified']);
     }
 
-    public function index() 
+    public function index()
     {
         return view('stock.index');
     }
 
-    public function findAll(Request $request)
+    public function findAll()
     {
-        $movements = Movement::where('user_id', $request->user()->id)->get();
-        
-        echo json_encode(['data' => $movements]);
+        $movements = User::find(Auth::id())->movements()->get();
+
+        return ['data' => $movements];
     }
 
     public function add(Request $request)
     {
-        $products = Product::where('user_id', $request->user()->id)->get();
+        $products = User::find(Auth::id())->products()->get();
 
         return view('stock.add', ['products' => $products]);
     }
 
     public function edit(Request $request, $id)
     {
-        $movement = Movement::where('user_id', $request->user()->id)
-        ->where('id', $id)->first();
+        $movement = User::find(Auth::id())->movements()->find($id);
 
         if ($movement) {
-            $products = Product::where('user_id', $request->user()->id)->get();
+            $products = User::find(Auth::id())->products()->get();
 
-            $movementProducts = ProductMovement::where('movement_id', $id)->get();
+            $movementProducts = MovementProduct::where('movement_id', $id)->get();
 
             return view('stock.edit', ['products' => $products, 'movement' => $movement, 'movementProducts' => $movementProducts]);
         }
@@ -57,12 +58,12 @@ class StockController extends Controller
         for ($i = 0; $i < count($dados['idProducts']); $i++) {
             $dados['values'][$i] = str_replace(',', '.', $dados['values'][$i]);
 
-            $input = ['product_id' => $dados['idProducts'][$i], 'quantity' => $dados['quantities'][$i], 
+            $input = ['product_id' => $dados['idProducts'][$i], 'quantity' => $dados['quantities'][$i],
             'value' => $dados['values'][$i]];
             $rules = ['product_id' => 'required|max:100', 'quantity' => 'required|integer', 'value' => 'required|numeric'];
 
             $validator = Validator::make($input, $rules);
-            
+
             if ($validator->fails()) {
                 return redirect()
                 ->action('StockController@add')
@@ -75,7 +76,7 @@ class StockController extends Controller
         $dados['total'] = $this->getTotal($dados['quantities'], $dados['values']);
 
         $movement = Movement::create($dados);
-    
+
         $this->addProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $dados['values']);
 
         return redirect()
@@ -93,12 +94,12 @@ class StockController extends Controller
             for ($i = 0; $i < count($dados['idProducts']); $i++) {
                 $dados['values'][$i] = str_replace(',', '.', $dados['values'][$i]);
 
-                $input = ['product_id' => $dados['idProducts'][$i], 'quantity' => $dados['quantities'][$i], 
+                $input = ['product_id' => $dados['idProducts'][$i], 'quantity' => $dados['quantities'][$i],
                 'value' => $dados['values'][$i]];
                 $rules = ['product_id' => 'required|max:100', 'quantity' => 'required|integer', 'value' => 'required|numeric'];
 
                 $validator = Validator::make($input, $rules);
-                
+
                 if ($validator->fails()) {
                     return redirect()
                     ->action('StockController@edit',  ['id' => $request->id])
@@ -132,21 +133,21 @@ class StockController extends Controller
         }
     }
 
-    private function getTotal($quantities, $values) 
+    private function getTotal($quantities, $values)
     {
         $total = 0;
-        
+
         for ($i = 0; $i < count($quantities); $i++) {
-            $total += intval($quantities[$i]) * floatval($values[$i]); 
+            $total += intval($quantities[$i]) * floatval($values[$i]);
         }
 
         return $total;
     }
 
-    private function addProductMovement($idMovement, $idProducts, $quantities, $values) 
+    private function addProductMovement($idMovement, $idProducts, $quantities, $values)
     {
         for ($i = 0; $i < count($quantities); $i++) {
-            ProductMovement::create([
+            MovementProduct::create([
                 'product_id' => $idProducts[$i],
                 'quantity' => $quantities[$i],
                 'value' => $values[$i],
@@ -155,25 +156,25 @@ class StockController extends Controller
 
             $product = Product::find($idProducts[$i]);
             $movement = Movement::find($idMovement);
-            
+
             if ($movement->type == 'entry') {
                 $product->current_stock += intval($quantities[$i]);
             } else {
                 $product->current_stock -= intval($quantities[$i]);
             }
-            
-            $product->update(); 
+
+            $product->update();
         }
     }
 
     private function deleteProductMovements($id)
     {
-        $movementProducts = ProductMovement::where('movement_id', $id)->get();
+        $movementProducts = MovementProduct::where('movement_id', $id)->get();
         $movement = Movement::find($id);
 
         foreach ($movementProducts as $movementProduct) {
             $product = Product::find($movementProduct['product_id']);
-          
+
             if ($movement->type == 'entry') {
                 $product->current_stock -= intval($movementProduct['quantity']);
             } else {
@@ -181,7 +182,7 @@ class StockController extends Controller
             }
 
             $product->update();
-            $movementProduct->delete(); 
+            $movementProduct->delete();
         }
     }
 }
