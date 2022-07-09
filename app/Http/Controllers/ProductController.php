@@ -39,7 +39,7 @@ class ProductController extends Controller
         if ($request->hasFile('photo')) {
             $ext = $dados['photo']->extension();
             $imageName = time() . '.' . $ext;
-            $dados['photo']->storeAs('public/images', $imageName);
+            $dados['photo']->storeAs('produtos', $imageName, 'upload');
             $dados['photo'] = $imageName;
         }
 
@@ -72,9 +72,9 @@ class ProductController extends Controller
             if ($request->hasFile('photo')) {
                 $ext = $dados['photo']->extension();
                 $imageName = time() . '.' . $ext;
-                $dados['photo']->storeAs('public/images', $imageName);
+                $dados['photo']->storeAs('produtos', $imageName, 'upload');
                 $dados['photo'] = $imageName;
-                Storage::delete('public/images/'.$product['photo']);
+                Storage::disk('upload')->delete('produtos/'.$product->photo);
             }
 
             $product->update($dados);
@@ -98,7 +98,7 @@ class ProductController extends Controller
                 $movement['total'] -= $movementProduct->pivot->quantity * $movementProduct->pivot->value;
                 $movement->update();
             }
-
+            Storage::disk('upload')->delete('produtos/'.$product->photo);
             $product->delete();
         }
     }

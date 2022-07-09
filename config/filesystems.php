@@ -64,10 +64,10 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
-
+        
+        'upload' => [
+            'driver' => 'local',
+            'root' => public_path('imagens'),
+        ]
     ],
-    
-    'links' => [
-        public_path('storage') => storage_path('app/public')
-    ]
 ];

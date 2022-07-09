@@ -34,7 +34,7 @@
         </span>
     @enderror
     @if (isset($product->photo))
-        <img class="mt-3" height="100" src="{{ asset('storage/images/'.$product->photo) }}">
+        <img class="mt-3" height="100" src="{{ asset('imagens/produtos/'.$product->photo) }}">
     @endif
 </div>
 <button type="submit" class="btn btn-sm btn-primary">SALVAR</button>
