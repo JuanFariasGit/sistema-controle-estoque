@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ProductRequest;
 use App\Movement;
 use App\User;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -37,9 +38,9 @@ class ProductController extends Controller
 
         if ($request->hasFile('photo')) {
             $ext = $dados['photo']->extension();
-            $imageName = time().'.'.$ext;
-            $dados['photo']->move(public_path('media/images'), $imageName);
-            $dados['photo'] = asset('media/images').'/'.$imageName;
+            $imageName = time() . '.' . $ext;
+            $dados['photo']->storeAs('public/images', $imageName);
+            $dados['photo'] = $imageName;
         }
 
         $dados['current_stock'] = 0;
@@ -47,7 +48,7 @@ class ProductController extends Controller
         User::find(Auth::id())->products()->create($dados);
 
         return redirect()
-        ->action('ProductController@index');
+            ->action('ProductController@index');
     }
 
     public function edit($id)
@@ -67,18 +68,19 @@ class ProductController extends Controller
 
         if ($product) {
             $dados = $request->all();
-
+            
             if ($request->hasFile('photo')) {
                 $ext = $dados['photo']->extension();
-                $imageName = time().'.'.$ext;
-                $dados['photo']->move(public_path('media/images'), $imageName);
-                $dados['photo'] = asset('media/images').'/'.$imageName;
+                $imageName = time() . '.' . $ext;
+                $dados['photo']->storeAs('public/images', $imageName);
+                $dados['photo'] = $imageName;
+                Storage::delete('public/images/'.$product['photo']);
             }
 
             $product->update($dados);
 
             return redirect()
-            ->action('ProductController@index');
+                ->action('ProductController@index');
         }
 
         abort('404');
@@ -92,9 +94,9 @@ class ProductController extends Controller
             $movementProducts = $product->movements;
 
             foreach ($movementProducts as $movementProduct) {
-               $movement = Movement::find($movementProduct->pivot->movement_id);
-               $movement['total'] -= $movementProduct->pivot->quantity * $movementProduct->pivot->value;
-               $movement->update();
+                $movement = Movement::find($movementProduct->pivot->movement_id);
+                $movement['total'] -= $movementProduct->pivot->quantity * $movementProduct->pivot->value;
+                $movement->update();
             }
 
             $product->delete();

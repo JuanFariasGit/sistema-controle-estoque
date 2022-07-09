@@ -54,7 +54,7 @@
                 "title": "Foto", 
                 "data":"photo",
                 "render": function(photo) {
-                    return `<image height="100" src="${photo}">`;
+                    return `<image height="100" src="{{ asset('storage/images/${photo}') }}">`;
                 }
             },
             {
