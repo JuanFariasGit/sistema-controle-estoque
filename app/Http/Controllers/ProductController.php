@@ -102,4 +102,11 @@ class ProductController extends Controller
             $product->delete();
         }
     }
+
+    public function downloadPhoto($id) 
+    {
+        $product = $product = User::find(Auth::id())->products()->find($id);
+        $imageName = $product->name.'_'.$product->photo;
+        return Storage::disk('upload')->download('produtos/'.$product->photo, $imageName);
+    }
 }

@@ -73,6 +73,7 @@
                 "title": "Ações", 
                 "data": function(data) {
                     let urlEdit = "{{ route('product.edit', ':id') }}"
+                    let urlDownload = "{{ route('product.download-photo', ':id') }}"
 
                     html = `<a href="${urlEdit.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
                     <i class="far fa-edit fa-lg"></i>
@@ -80,6 +81,9 @@
                     html += `<button id="row_${data.id}" class="btn btn-sm btn-danger mx-1" onclick="deleteProductModal('${data.id}', '${data.name}')">
                         <i class="far fa-trash-alt fa-lg"></i>
                     </button>`
+                    html += `<a href="${urlDownload.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
+                    <i class="fas fa-download"></i>
+                    </button></a>`
                     return html
                 }
             }
