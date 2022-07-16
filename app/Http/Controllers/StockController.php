@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\MovementRequest;
-use App\Movement;
-use App\Product;
-use App\MovementProduct;
-use App\User;
+use App\Models\Movement;
+use App\Models\Product;
+use App\Models\MovementProduct;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class StockController extends Controller

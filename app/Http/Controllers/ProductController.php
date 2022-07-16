@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ProductRequest;
-use App\Movement;
-use App\User;
+use App\Models\Movement;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller

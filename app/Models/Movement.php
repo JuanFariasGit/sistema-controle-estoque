@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,12 +12,12 @@ class Movement extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
     }
 
     public function products()
     {
-        return $this->belongsToMany('App\Product', 'movement_products')
+        return $this->belongsToMany('App\Models\Product', 'movement_products')
         ->withPivot(['quantity', 'value']);
     }
 }
