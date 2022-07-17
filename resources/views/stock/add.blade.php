@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Adicionar Movimentação')
 
 @section('content')
 <div class="container">

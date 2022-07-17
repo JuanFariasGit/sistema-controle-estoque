@@ -36,7 +36,7 @@ class ProductController extends Controller
     {
         $dados = $request->all();
 
-        if ($request->hasFile('photo')) {
+        if ($request->hasFile('photo') && $_FILES['photo']['name'] != "padrao.png") {
             $ext = $dados['photo']->extension();
             $imageName = time() . '.' . $ext;
             $dados['photo']->storeAs('produtos', $imageName, 'upload');
@@ -69,13 +69,16 @@ class ProductController extends Controller
         if ($product) {
             $dados = $request->all();
             
-            if ($request->hasFile('photo')) {
+            if ($request->hasFile('photo') && $_FILES['photo']['name'] != "padrao.png") {
                 $ext = $dados['photo']->extension();
                 $imageName = time() . '.' . $ext;
                 $dados['photo']->storeAs('produtos', $imageName, 'upload');
                 $dados['photo'] = $imageName;
-                Storage::disk('upload')->delete('produtos/'.$product->photo);
+            } else {
+                $dados['photo'] = '';
             }
+
+            Storage::disk('upload')->delete('produtos/'.$product->photo);
 
             $product->update($dados);
 
@@ -105,7 +108,7 @@ class ProductController extends Controller
 
     public function downloadPhoto($id) 
     {
-        $product = $product = User::find(Auth::id())->products()->find($id);
+        $product = User::find(Auth::id())->products()->find($id);
         $imageName = $product->name.'_'.$product->photo;
         return Storage::disk('upload')->download('produtos/'.$product->photo, $imageName);
     }
