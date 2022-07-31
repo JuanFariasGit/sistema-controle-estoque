@@ -8,11 +8,19 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center"> 
+    @if (session('alert'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('alert') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+    <div class="d-flex justify-content-between align-items-center">
         <h1>ESTOQUE MOVIMENTAÇÕES</h1>
         <a href="{{ route('stock.add') }}"><button class="btn btn-sm btn-primary">
-            <i class="fas fa-plus-circle fa-lg"></i>
-        </button></a>
+                <i class="fas fa-plus-circle fa-lg"></i>
+            </button></a>
     </div>
     <table id="movements" class="table table-striped table-bordered text-center"></table>
 </div>
@@ -36,8 +44,8 @@
         "responsive": true,
         "autoWidth": false,
         "columnDefs": [{
-        "targets": [ 4 ],
-        "orderable": false 
+            "targets": [4],
+            "orderable": false
         }],
         "ajax": {
             "method": "POST",
@@ -46,16 +54,15 @@
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             }
         },
-        "columns": [
-            {
-                "title": "Data e Hora", 
+        "columns": [{
+                "title": "Data e Hora",
                 "data": "date_time",
                 "render": function(dateTime) {
-                   return formatDateTime(dateTime)
+                    return formatDateTime(dateTime)
                 }
             },
             {
-                "title": "Tipo", 
+                "title": "Tipo",
                 "data": "type",
                 "render": function(type) {
                     if (type == 'entry') {
@@ -65,8 +72,8 @@
                 }
             },
             {
-                "title": "Descrição", 
-                "data":"description"
+                "title": "Descrição",
+                "data": "description"
             },
             {
                 "title": "Total",
@@ -76,7 +83,7 @@
                 }
             },
             {
-                "title": "Ações", 
+                "title": "Ações",
                 "data": function(data) {
                     let urlEdit = "{{ route('stock.edit', ':id') }}"
 
@@ -90,19 +97,19 @@
                 }
             }
         ],
-            "language": {
-                "infoFiltered":   "(filtrado do total de _MAX_ entradas)",
-                "infoEmpty":      "Mostrando 0 a 0 de 0 entradas",
-                "zeroRecords": "Nenhum registro correspondente encontrado",
-                "loadingRecords": "Carregando...",
-                "lengthMenu": "Mostrar _MENU_ entrada(s)",
-                "info": "Mostrando _START_ a _END_ de _TOTAL_ entrada(s)",
-                "search": "Procurar:",
-                "paginate": {
-                "next":  "›",
+        "language": {
+            "infoFiltered": "(filtrado do total de _MAX_ entradas)",
+            "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+            "zeroRecords": "Nenhum registro correspondente encontrado",
+            "loadingRecords": "Carregando...",
+            "lengthMenu": "Mostrar _MENU_ entrada(s)",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ entrada(s)",
+            "search": "Procurar:",
+            "paginate": {
+                "next": "›",
                 "previous": "‹"
             }
-        },   
+        },
     })
 
     const deleteMovementModal = (id, dateTime) => {
@@ -118,15 +125,17 @@
     }
 
     const deleteMovement = (id) => {
-        let urlDel = "{{ route('stock.del', ':id') }}" 
+        let urlDel = "{{ route('stock.del', ':id') }}"
 
-        $.ajax ({
+        $.ajax({
             "method": "DELETE",
             "url": `${urlDel.replace(':id', id)}`,
             "headers": {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
-            "data": {"id": id},
+            "data": {
+                "id": id
+            },
             success: function() {
                 table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
                 closeModal()
@@ -136,11 +145,17 @@
 
     function formatDateTime(dateTime) {
         let dt = new Date(dateTime)
-        return dt.toLocaleString('pt-Br', { dateStyle: "short", timeStyle: "short" }) 
+        return dt.toLocaleString('pt-Br', {
+            dateStyle: "short",
+            timeStyle: "short"
+        })
     }
 
     function formatTotal(total) {
-        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total);
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(total);
     }
 </script>
 @endsection

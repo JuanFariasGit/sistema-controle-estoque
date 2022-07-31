@@ -79,8 +79,7 @@ class StockController extends Controller
 
         $this->addProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $dados['values']);
 
-        return redirect()
-        ->action('StockController@index');
+        return redirect()->route('stock.index')->with('alert', 'Movimentação adicionada com sucesso !');
     }
 
     public function editAction(MovementRequest $request)
@@ -118,8 +117,7 @@ class StockController extends Controller
             $this->addProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $dados['values']);
         }
 
-        return redirect()
-        ->action('StockController@index');
+        return redirect()->route('stock.index')->with('alert', 'Movimentação atualizada com sucesso !');
     }
 
     public function delete(Request $request, $id)

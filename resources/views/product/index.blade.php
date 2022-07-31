@@ -8,11 +8,19 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center"> 
+    @if (session('alert'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('alert') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+    <div class="d-flex justify-content-between align-items-center">
         <h1>PRODUTOS</h1>
         <a href="{{ route('product.add') }}"><button class="btn btn-sm btn-primary">
-            <i class="fas fa-plus-circle fa-lg"></i>
-        </button></a>
+                <i class="fas fa-plus-circle fa-lg"></i>
+            </button></a>
     </div>
     <table id="products" class="table table-striped table-bordered text-center"></table>
 </div>
@@ -36,8 +44,8 @@
         "responsive": true,
         "autoWidth": false,
         "columnDefs": [{
-        "targets": [ 1, 5 ],
-        "orderable": false 
+            "targets": [1, 5],
+            "orderable": false
         }],
         "ajax": {
             "method": "POST",
@@ -46,14 +54,13 @@
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             }
         },
-        "columns": [
-            {
-                "title": "Código", 
-                "data":"code"
+        "columns": [{
+                "title": "Código",
+                "data": "code"
             },
             {
-                "title": "Foto", 
-                "data":"photo",
+                "title": "Foto",
+                "data": "photo",
                 "render": function(photo) {
                     if (photo) {
                         return `<image width="100" src="{{ asset('imagens/produtos/${photo}') }}">`;
@@ -62,19 +69,19 @@
                 }
             },
             {
-                "title": "Nome", 
-                "data":"name"
+                "title": "Nome",
+                "data": "name"
             },
             {
-                "title": "Capacidade (ml)", 
-                "data":"capacity"
+                "title": "Capacidade (ml)",
+                "data": "capacity"
             },
             {
-                "title": "Estoque atual", 
-                "data":"current_stock"
+                "title": "Estoque atual",
+                "data": "current_stock"
             },
             {
-                "title": "Ações", 
+                "title": "Ações",
                 "data": function(data) {
                     let urlEdit = "{{ route('product.edit', ':id') }}"
                     let urlDownload = "{{ route('product.download-photo', ':id') }}"
@@ -92,19 +99,19 @@
                 }
             }
         ],
-            "language": {
-                "infoFiltered":   "(filtrado do total de _MAX_ entradas)",
-                "infoEmpty":      "Mostrando 0 a 0 de 0 entradas",
-                "zeroRecords": "Nenhum registro correspondente encontrado",
-                "loadingRecords": "Carregando...",
-                "lengthMenu": "Mostrar _MENU_ entrada(s)",
-                "info": "Mostrando _START_ a _END_ de _TOTAL_ entrada(s)",
-                "search": "Procurar:",
-                "paginate": {
-                "next":  "›",
+        "language": {
+            "infoFiltered": "(filtrado do total de _MAX_ entradas)",
+            "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+            "zeroRecords": "Nenhum registro correspondente encontrado",
+            "loadingRecords": "Carregando...",
+            "lengthMenu": "Mostrar _MENU_ entrada(s)",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ entrada(s)",
+            "search": "Procurar:",
+            "paginate": {
+                "next": "›",
                 "previous": "‹"
             }
-        },   
+        },
     })
 
     const deleteProductModal = (id, item) => {
@@ -120,9 +127,9 @@
     }
 
     const deleteProduct = (id) => {
-        let urlDel = "{{ route('product.del', ':id') }}" 
+        let urlDel = "{{ route('product.del', ':id') }}"
 
-        $.ajax ({
+        $.ajax({
             "method": "DELETE",
             "url": `${urlDel.replace(':id', id)}`,
             "headers": {

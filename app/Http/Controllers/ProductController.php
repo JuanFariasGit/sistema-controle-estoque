@@ -47,8 +47,7 @@ class ProductController extends Controller
 
         User::find(Auth::id())->products()->create($dados);
 
-        return redirect()
-            ->action('ProductController@index');
+        return redirect()->route('product.index')->with("alert", "O Produto foi adicionado com sucesso !");
     }
 
     public function edit($id)
@@ -79,8 +78,7 @@ class ProductController extends Controller
 
             $product->update($dados);
 
-            return redirect()
-                ->action('ProductController@index');
+            return redirect()->route('product.index')->with("alert", "O Produto de código {$product->code} foi atualizado com sucesso !");
         }
 
         abort('404');
