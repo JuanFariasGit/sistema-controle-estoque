@@ -67,14 +67,33 @@
 
         delPhoto.addEventListener('click', function () {
             let reader = new FileReader();
-            
+            let id = document.querySelector("input[name='id']").value;
+
             reader.onload = function () {
                 imgPhoto.src = "{{ asset('imagens/padrao.png') }}";
             }
-            
-            filePhoto.value = '';
 
-            reader.readAsDataURL(new Blob([], {type: 'image/*'}));
+            filePhoto.value = '';
+            
+            reader.readAsDataURL(new Blob([], {type: 'image/png'}));
+            
+            deleteImg(id);
         })
+
+        function deleteImg(id) {
+            let urlDel = "{{ route('product.del-photo', ':id') }}";
+
+            $.ajax ({
+                "method": "DELETE",
+                "url": `${urlDel.replace(':id', id)}`,
+                "headers": {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                },
+                success: function() {
+                    table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
+                    closeModal()
+                }
+            })
+        }
     </script>
 @endsection

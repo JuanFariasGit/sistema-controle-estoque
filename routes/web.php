@@ -26,6 +26,7 @@ Route::prefix('/produtos')->group(function() {
     Route::post('/editar/{id}', 'ProductController@editAction');
 
     Route::delete('/excluir/{id}', 'ProductController@delete')->name('product.del');
+    Route::delete('/excluir-foto/{id}', 'ProductController@deletePhoto')->name('product.del-photo');
 
     Route::get('/download-photo/{id}', 'ProductController@downloadPhoto')->name('product.download-photo');
 });

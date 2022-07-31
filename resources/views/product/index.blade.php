@@ -128,7 +128,6 @@
             "headers": {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
-            "data": {"id": id},
             success: function() {
                 table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
                 closeModal()
