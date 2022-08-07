@@ -39,7 +39,7 @@ class ProductController extends Controller
         if ($request->hasFile('photo')) {
             $ext = $dados['photo']->extension();
             $imageName = time() . '.' . $ext;
-            $dados['photo']->storeAs('produtos', $imageName, 'upload');
+            $dados['photo']->storeAs('produtos', $imageName);
             $dados['photo'] = $imageName;
         }
 
@@ -73,7 +73,7 @@ class ProductController extends Controller
                 $imageName = time() . '.' . $ext;
                 $dados['photo']->storeAs('produtos', $imageName, 'upload');
                 $dados['photo'] = $imageName;
-                Storage::disk('upload')->delete('produtos/' . $product->photo);
+                Storage::delete('produtos/' . $product->photo);
             }
 
             $product->update($dados);
@@ -96,7 +96,7 @@ class ProductController extends Controller
                 $movement['total'] -= $movementProduct->pivot->quantity * $movementProduct->pivot->value;
                 $movement->update();
             }
-            Storage::disk('upload')->delete('produtos/' . $product->photo);
+            Storage::delete('produtos/' . $product->photo);
             $product->delete();
         }
     }
@@ -105,7 +105,7 @@ class ProductController extends Controller
     {
         $product = User::find(Auth::id())->products()->find($id);
         if ($product) {
-            Storage::disk('upload')->delete('produtos/' . $product->photo);
+            Storage::delete('produtos/' . $product->photo);
             $product['photo'] = '';
             $product->update();
         }
@@ -116,7 +116,7 @@ class ProductController extends Controller
         $product = User::find(Auth::id())->products()->find($id);
         if (!empty($product->photo)) {
             $imageName = $product->name . '_' . $product->photo;
-            return Storage::disk('upload')->download('produtos/' . $product->photo, $imageName);
+            return Storage::download('produtos/' . $product->photo, $imageName);
         } 
         abort('404');
     }
