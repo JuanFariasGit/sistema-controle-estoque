@@ -32,6 +32,14 @@
         </div>
     </div>
 </div>
+<div id="modal-view" class="modal fade" role="dialog" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body"></div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -87,7 +95,8 @@
                 "data": function(data) {
                     let urlEdit = "{{ route('stock.edit', ':id') }}"
 
-                    html = `<a href="${urlEdit.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
+                    html = `<button class="btn btn-sm btn-success mx-1" onclick="viewMovementModal('${data.id}')"><i class="far fa-eye fa-lg"></i></button>`
+                    html += `<a href="${urlEdit.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
                     <i class="far fa-edit fa-lg"></i>
                     </button></a>`
                     html += `<button id="row_${data.id}" class="btn btn-sm btn-danger mx-1" onclick="deleteMovementModal('${data.id}', '${data.date_time}')">
@@ -124,6 +133,12 @@
         $('#modal').find('.modal-footer').html('')
     }
 
+    const closeModalView = () => {
+        $('#modal-view').modal('hide')
+        $('#modal-view').find('.modal-body').html('')
+        $('#modal-view').find('.modal-footer').html('')
+    }
+
     const deleteMovement = (id) => {
         let urlDel = "{{ route('stock.del', ':id') }}"
 
@@ -156,6 +171,46 @@
             style: 'currency',
             currency: 'BRL'
         }).format(total);
+    }
+
+    function viewMovementModal(id) {
+        let urlView = "{{ route('stock.view-moviment', ':id') }}"
+
+        $.ajax({
+            "method": "POST",
+            "url": `${urlView.replace(':id', id)}`,
+            "headers": {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            },
+            success: function(resp) {
+                const tipos = {"entry": "Entrada", "exit": "Saída"}
+                $('#modal-view').modal('show')
+                movement_html = `
+                <p><strong>Data e Hora:</strong> ${formatDateTime(resp.movement.date_time)}</p>
+                <p><strong>Descrição:</strong> ${resp.movement.description}</p>
+                <p><strong>Tipo:</strong> ${tipos[resp.movement.type]}</p>
+                <p><strong>Total:</strong> ${resp.movement.total}</p> 
+                `
+                $('#modal-view').find('.modal-body').html(`<p>Data e Hora: ${formatDateTime(resp.movement.date_time)}</p>`)
+                products_html = '<strong>Produtos</strong>'
+                let i = 0
+                const len = resp.products.length
+                for (let p of resp.products) {
+                    products_html += `
+                    <p>Código: ${p.code}</p>
+                    <p>Nome: ${p.name}</p>
+                    <p>Quatidade: ${p.quantity}</p>
+                    <p>Valor: ${p.value}</p>
+                    `
+                    i++
+                    if (i < len) {
+                        products_html += '<p>------------------</p>'
+                    }
+                }
+                $('#modal-view').find('.modal-body').html(movement_html + products_html)
+                $('#modal-view').find('.modal-footer').html(`<button class="btn btn-primary" onclick="closeModalView()">Fechar</button>`)
+            }
+        })
     }
 </script>
 @endsection

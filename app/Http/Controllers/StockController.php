@@ -9,6 +9,7 @@ use App\Models\Movement;
 use App\Models\Product;
 use App\Models\MovementProduct;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class StockController extends Controller
@@ -129,6 +130,13 @@ class StockController extends Controller
             $this->deleteProductMovements($id);
             $movement->delete();
         }
+    }
+
+    public function viewMovement(Request $request, $id)
+    {
+        $movement = Movement::where('user_id', $request->user()->id)->where('id', $id)->first();
+        $products = DB::select('select p.code, p.name, mp.quantity, mp.value from products p inner join movement_products mp on p.id = mp.product_id inner join movements m on m.id = mp.movement_id where m.id = ?', [$id]);
+        return ['movement' => $movement, 'products' => $products];
     }
 
     private function getTotal($quantities, $values)

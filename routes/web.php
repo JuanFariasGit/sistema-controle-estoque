@@ -34,6 +34,8 @@ Route::prefix('/produtos')->group(function() {
 Route::prefix('/estoque')->group(function() {
     Route::get('/', 'StockController@index')->name('stock.index');
     Route::post('/', 'StockController@findAll');
+    
+    Route::post('/visualizar-movimentacao/{id}', 'StockController@viewMovement')->name('stock.view-moviment');
 
     Route::get('/adicionar', 'StockController@add')->name('stock.add');
     Route::post('/adicionar', 'StockController@addAction');
