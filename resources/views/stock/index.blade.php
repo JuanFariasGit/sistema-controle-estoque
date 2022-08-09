@@ -35,6 +35,11 @@
 <div id="modal-view" class="modal fade" role="dialog" data-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body"></div>
             <div class="modal-footer"></div>
         </div>
@@ -87,7 +92,7 @@
                 "title": "Total",
                 "data": "total",
                 "render": function(total) {
-                    return formatTotal(total)
+                    return formatPrice(total)
                 }
             },
             {
@@ -133,12 +138,6 @@
         $('#modal').find('.modal-footer').html('')
     }
 
-    const closeModalView = () => {
-        $('#modal-view').modal('hide')
-        $('#modal-view').find('.modal-body').html('')
-        $('#modal-view').find('.modal-footer').html('')
-    }
-
     const deleteMovement = (id) => {
         let urlDel = "{{ route('stock.del', ':id') }}"
 
@@ -166,11 +165,11 @@
         })
     }
 
-    function formatTotal(total) {
+    function formatPrice(price) {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
-        }).format(total);
+        }).format(price);
     }
 
     function viewMovementModal(id) {
@@ -183,13 +182,16 @@
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
             success: function(resp) {
-                const tipos = {"entry": "Entrada", "exit": "Saída"}
+                const tipos = {
+                    "entry": "Entrada",
+                    "exit": "Saída"
+                }
                 $('#modal-view').modal('show')
                 movement_html = `
                 <p><strong>Data e Hora:</strong> ${formatDateTime(resp.movement.date_time)}</p>
                 <p><strong>Descrição:</strong> ${resp.movement.description}</p>
                 <p><strong>Tipo:</strong> ${tipos[resp.movement.type]}</p>
-                <p><strong>Total:</strong> ${resp.movement.total}</p> 
+                <p><strong>Total:</strong> ${formatPrice(resp.movement.total)}</p> 
                 `
                 $('#modal-view').find('.modal-body').html(`<p>Data e Hora: ${formatDateTime(resp.movement.date_time)}</p>`)
                 products_html = '<strong>Produtos</strong>'
@@ -200,7 +202,7 @@
                     <p>Código: ${p.code}</p>
                     <p>Nome: ${p.name}</p>
                     <p>Quatidade: ${p.quantity}</p>
-                    <p>Valor: ${p.value}</p>
+                    <p>Valor: ${formatPrice(p.value)}</p>
                     `
                     i++
                     if (i < len) {
@@ -208,7 +210,6 @@
                     }
                 }
                 $('#modal-view').find('.modal-body').html(movement_html + products_html)
-                $('#modal-view').find('.modal-footer').html(`<button class="btn btn-primary" onclick="closeModalView()">Fechar</button>`)
             }
         })
     }

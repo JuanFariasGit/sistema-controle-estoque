@@ -57,10 +57,6 @@
                 "url": `${urlDel.replace(':id', id)}`,
                 "headers": {
                     "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                },
-                success: function() {
-                    table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
-                    closeModal()
                 }
             })
         }
