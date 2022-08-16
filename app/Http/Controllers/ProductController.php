@@ -71,7 +71,7 @@ class ProductController extends Controller
             if ($request->hasFile('photo')) {
                 $ext = $dados['photo']->extension();
                 $imageName = time() . '.' . $ext;
-                $dados['photo']->storeAs('produtos', $imageName, 'upload');
+                $dados['photo']->storeAs('produtos', $imageName);
                 $dados['photo'] = $imageName;
                 Storage::delete('produtos/' . $product->photo);
             }

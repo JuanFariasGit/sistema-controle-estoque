@@ -203,6 +203,7 @@
                     <p>Nome: ${p.name}</p>
                     <p>Quatidade: ${p.quantity}</p>
                     <p>Valor: ${formatPrice(p.value)}</p>
+                    <p>Subtotal: ${formatPrice(p.value * p.quantity)}</p>
                     `
                     i++
                     if (i < len) {
