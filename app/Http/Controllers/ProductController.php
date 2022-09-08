@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Movement;
+use Illuminate\Http\Request;
+use App\Models\MovementProduct;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ProductRequest;
-use App\Models\Movement;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -84,26 +86,27 @@ class ProductController extends Controller
         abort('404');
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
-        $product = User::find(Auth::id())->products()->find($id);
+        $product = User::find(Auth::id())->products()->find($request->id);
 
         if ($product) {
-            $movementProducts = $product->movements;
+            $movements = $product->movements;
 
-            foreach ($movementProducts as $movementProduct) {
-                $movement = Movement::find($movementProduct->pivot->movement_id);
-                $movement['total'] -= $movementProduct->pivot->quantity * $movementProduct->pivot->value;
+            foreach ($movements as $m) {
+                $movement = Movement::find($m->pivot->movement_id);
+                $movement['total'] -= $m->pivot->quantity * $m->pivot->value;
                 $movement->update();
+                MovementProduct::find($m->pivot->id)->delete();
             }
             Storage::delete('produtos/' . $product->photo);
             $product->delete();
         }
     }
 
-    public function deletePhoto($id)
+    public function deletePhoto(Request $request)
     {
-        $product = User::find(Auth::id())->products()->find($id);
+        $product = User::find(Auth::id())->products()->find($request->id);
         if ($product) {
             Storage::delete('produtos/' . $product->photo);
             $product['photo'] = '';

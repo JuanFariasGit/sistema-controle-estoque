@@ -139,11 +139,9 @@
     }
 
     const deleteMovement = (id) => {
-        let urlDel = "{{ route('stock.del', ':id') }}"
-
         $.ajax({
-            "method": "DELETE",
-            "url": `${urlDel.replace(':id', id)}`,
+            "method": "POST",
+            "url": "{{ route('stock.del') }}",
             "headers": {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },

@@ -25,8 +25,8 @@ Route::prefix('/produtos')->group(function() {
     Route::get('/editar/{id}', 'ProductController@edit')->name('product.edit');
     Route::post('/editar/{id}', 'ProductController@editAction');
 
-    Route::delete('/excluir/{id}', 'ProductController@delete')->name('product.del');
-    Route::delete('/excluir-foto/{id}', 'ProductController@deletePhoto')->name('product.del-photo');
+    Route::post('/excluir', 'ProductController@delete')->name('product.del');
+    Route::post('/excluir-foto', 'ProductController@deletePhoto')->name('product.del-photo');
 
     Route::get('/download-photo/{id}', 'ProductController@downloadPhoto')->name('product.download-photo');
 });
@@ -43,5 +43,5 @@ Route::prefix('/estoque')->group(function() {
     Route::get('/editar/{id}', 'StockController@edit')->name('stock.edit');
     Route::post('/editar/{id}', 'StockController@editAction');
 
-    Route::delete('/excluir/{id}', 'StockController@delete')->name('stock.del');
+    Route::post('/excluir', 'StockController@delete')->name('stock.del');
 });

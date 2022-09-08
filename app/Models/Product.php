@@ -18,6 +18,6 @@ class Product extends Model
     public function movements()
     {
         return $this->belongsToMany('App\Models\Movement', 'movement_products')
-        ->withPivot(['quantity', 'value']);
+        ->withPivot(['id', 'quantity', 'value']);
     }
 }

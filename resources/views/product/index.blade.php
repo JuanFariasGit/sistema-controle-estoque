@@ -127,14 +127,13 @@
     }
 
     const deleteProduct = (id) => {
-        let urlDel = "{{ route('product.del', ':id') }}"
-
         $.ajax({
-            "method": "DELETE",
-            "url": `${urlDel.replace(':id', id)}`,
+            "method": "POST",
+            "url": "{{ route('product.del') }}",
             "headers": {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
+            "data": {"id": id},
             success: function() {
                 table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
                 closeModal()

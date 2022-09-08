@@ -50,14 +50,13 @@
         })
 
         function deleteImg(id) {
-            let urlDel = "{{ route('product.del-photo', ':id') }}";
-
             $.ajax ({
-                "method": "DELETE",
-                "url": `${urlDel.replace(':id', id)}`,
+                "method": "POST",
+                "url": "{{ route('product.del-photo') }}",
                 "headers": {
                     "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                }
+                },
+                "data": {"id": id}
             })
         }
     </script>
