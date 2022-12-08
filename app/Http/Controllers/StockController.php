@@ -155,8 +155,8 @@ class StockController extends Controller
         $movement = Movement::find($movementId);
         $products = $movement->products()->get()->pluck('id')->toArray();
         
-        $prevQuantity = 0;
         for ($i = 0; $i < count($quantities); $i++) {
+            $prevQuantity = 0;
             $product = Product::find($productsId[$i]);
             
             if (in_array($productsId[$i], $products)) {
