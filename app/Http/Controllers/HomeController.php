@@ -9,20 +9,20 @@ class HomeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware(['auth']);
     }
 
     public function index(Request $request)
     {
-        $productMovementEntry = MovementProduct::select('products.name', 'movement_products.quantity')
-        ->join('movements', 'movement_products.movement_id', 'movements.id')
-        ->join('products', 'movement_products.product_id', 'products.id')->where('movements.type', 'entry')
-        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'movement_products.quantity')->get();
+        $productMovementEntry = MovementProduct::join('movements', 'movement_products.movement_id', 'movements.id')
+        ->join('products', 'movement_products.product_id', 'products.id')->select(['products.name', 'movement_products.quantity'])
+        ->where('movements.type', 'entry')->where('movements.user_id', $request->user()->id)
+        ->groupBy('products.name', 'movement_products.quantity')->get();
 
-        $productMovementExit = MovementProduct::select('products.name', 'movement_products.quantity')
-        ->join('movements', 'movement_products.movement_id', 'movements.id')
-        ->join('products', 'movement_products.product_id', 'products.id')->where('movements.type', 'exit')
-        ->where('movements.user_id', $request->user()->id)->groupBy('products.name', 'movement_products.quantity')->get();
+        $productMovementExit = MovementProduct::join('movements', 'movement_products.movement_id', 'movements.id')
+        ->join('products', 'movement_products.product_id', 'products.id')->select(['products.name', 'movement_products.quantity'])
+        ->where('movements.type', 'exit')->where('movements.user_id', $request->user()->id)
+        ->groupBy('products.name', 'movement_products.quantity')->get();
 
         $entryPie = [];
         $entryTotal = 0;

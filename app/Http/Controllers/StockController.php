@@ -16,7 +16,7 @@ class StockController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware(['auth']);
     }
 
     public function index()
@@ -70,7 +70,7 @@ class StockController extends Controller
 
         $movement = Movement::create($dados);
 
-        $this->addProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
+        $this->createOrUpdateProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação adicionada com sucesso !');
     }
@@ -92,14 +92,12 @@ class StockController extends Controller
                     ->withInput();
             }
 
-            $this->deleteProductMovements($movement->id);
-
             $dados['user_id'] = $request->user()->id;
             $dados['total'] = $this->getTotal($dados['quantities'], $result['valuesNumberFormat']);
 
             $movement->update($dados);
 
-            $this->addProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
+            $this->createOrUpdateProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
         }
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação atualizada com sucesso !');
@@ -152,24 +150,35 @@ class StockController extends Controller
         return $total;
     }
 
-    private function addProductMovement($idMovement, $idProducts, $quantities, $values)
+    private function createOrUpdateProductMovement($movementId, $productsId, $quantities, $values)
     {
+        $movement = Movement::find($movementId);
+        $products = $movement->products()->get()->pluck('id')->toArray();
+        
+        $prevQuantity = 0;
         for ($i = 0; $i < count($quantities); $i++) {
-            MovementProduct::create([
-                'product_id' => $idProducts[$i],
-                'quantity' => $quantities[$i],
-                'value' => $values[$i],
-                'movement_id' => $idMovement
-            ]);
-
-            $product = Product::find($idProducts[$i]);
-            $movement = Movement::find($idMovement);
-
+            $product = Product::find($productsId[$i]);
+            
+            if (in_array($productsId[$i], $products)) {
+                $prevQuantity = $product->current_stock;
+                $movement->products()->updateExistingPivot($productsId[$i], [
+                    'quantity' => $quantities[$i],
+                    'value' => $values[$i]
+                ]);
+            } else {
+                $movement->products()->attach($productsId[$i], [
+                    'quantity' => $quantities[$i],
+                    'value' => $values[$i]
+                ]); 
+            }
+            
             if ($movement->type == 'entry') {
                 $product->current_stock += intval($quantities[$i]);
             } else {
                 $product->current_stock -= intval($quantities[$i]);
             }
+
+            $product->current_stock = $product->current_stock - $prevQuantity;
 
             $product->update();
         }
