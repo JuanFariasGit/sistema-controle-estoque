@@ -22,7 +22,47 @@
                 <i class="fas fa-plus-circle fa-lg"></i>
             </button></a>
     </div>
-    <table id="products" class="table table-striped table-bordered text-center"></table>
+    <table id="products" class="table table-striped table-bordered text-center">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Foto</th>
+                <th>Nome</th>
+                <th>Capacidade</th>
+                <th>Estoque atual</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($products as $row)
+            @can('user-product', $row)
+            <tr>
+                <td>{{ $row->code }}</td>
+                <td>
+                    <img width="200" src="{{ asset('imagens/produtos/' . $row->photo) }}">
+                </td>
+                <td>{{ $row->name }}</td>
+                <td>{{ $row->capacity }}</td>
+                <td>{{ $row->current_stock }}</td>
+                <td>
+                    <a href="{{ route('product.edit', $row->id) }}">
+                        <button class="btn btn-sm btn-primary mx-1">
+                            <i class="far fa-edit fa-lg"></i>
+                        </button>
+                    </a>
+                    <button 
+                        id="row_{{ $row->id }}" 
+                        class="btn btn-sm btn-danger mx-1" 
+                        onclick="deleteProductModal('{{ $row->id }}', '{{ $row->name }}')"
+                    >
+                        <i class="far fa-trash-alt fa-lg"></i>
+                    </button>
+                </td>
+            </tr>
+            @endcan
+            @endforeach
+        </tbody>
+    </table>
 </div>
 <div id="modal" class="modal fade" role="dialog" data-backdrop="static">
     <div class="modal-dialog">
@@ -47,58 +87,6 @@
             "targets": [1, 5],
             "orderable": false
         }],
-        "ajax": {
-            "method": "POST",
-            "url": "{{ route('product.index') }}",
-            "headers": {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-            }
-        },
-        "columns": [{
-                "title": "Código",
-                "data": "code"
-            },
-            {
-                "title": "Foto",
-                "data": "photo",
-                "render": function(photo) {
-                    if (photo) {
-                        return `<image width="100" src="{{ asset('imagens/produtos/${photo}') }}">`;
-                    }
-                    return `<image width="100" src="{{ asset('imagens/padrao.png') }}">`;
-                }
-            },
-            {
-                "title": "Nome",
-                "data": "name"
-            },
-            {
-                "title": "Capacidade (ml)",
-                "data": "capacity"
-            },
-            {
-                "title": "Estoque atual",
-                "data": "current_stock"
-            },
-            {
-                "title": "Ações",
-                "data": function(data) {
-                    let urlEdit = "{{ route('product.edit', ':id') }}"
-                    let urlDownload = "{{ route('product.download-photo', ':id') }}"
-
-                    html = `<a href="${urlEdit.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
-                    <i class="far fa-edit fa-lg"></i>
-                    </button></a>`
-                    html += `<button id="row_${data.id}" class="btn btn-sm btn-danger mx-1" onclick="deleteProductModal('${data.id}', '${data.name}')">
-                        <i class="far fa-trash-alt fa-lg"></i>
-                    </button>`
-                    html += `<a href="${urlDownload.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
-                    <i class="fas fa-download"></i>
-                    </button></a>`
-                    return html
-                }
-            }
-        ],
         "language": {
             "infoFiltered": "(filtrado do total de _MAX_ entradas)",
             "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
@@ -133,7 +121,9 @@
             "headers": {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
-            "data": {"id": id},
+            "data": {
+                "id": id
+            },
             success: function() {
                 table.row($(`#row_${id}`).parents('tr')).remove().draw(false);
                 closeModal()

@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->string('code')->unique();
             $table->string('name', 100)->unique();
             $table->integer('capacity');
-            $table->integer('current_stock');
+            $table->integer('current_stock')->default(0);
             $table->string('photo')->default('');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['code', 'name', 'capacity', 'photo', 'current_stock'];
+    protected $fillable = ['code', 'name', 'capacity', 'photo', 'user_id'];
 
     public $timestamps = false;
 
@@ -18,6 +18,6 @@ class Product extends Model
     public function movements()
     {
         return $this->belongsToMany('App\Models\Movement', 'movement_products')
-        ->withPivot(['id', 'quantity', 'value']);
+        ->withPivot(['quantity', 'value']);
     }
 }

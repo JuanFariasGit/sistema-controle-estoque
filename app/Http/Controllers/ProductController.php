@@ -2,31 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Movement;
 use Illuminate\Http\Request;
-use App\Models\MovementProduct;
-use Illuminate\Support\Facades\Auth;
+use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function __construct()
+    private $service;
+
+    public function __construct(ProductService $service)
     {
         $this->middleware(['auth']);
+        $this->service = $service;
     }
 
     public function index()
     {
-        return view('product.index');
-    }
+        $products = $this->service->findAll();
 
-    public function findAll()
-    {
-        $products = User::find(Auth::id())->products()->get();
-
-        return ['data' => $products];
+        return view('product.index', compact('products'));
     }
 
     public function add()
@@ -36,28 +30,24 @@ class ProductController extends Controller
 
     public function addAction(ProductRequest $request)
     {
-        $dados = $request->all();
+        $data = $request->validated();
 
-        if ($request->hasFile('photo')) {
-            $ext = $dados['photo']->extension();
-            $imageName = time() . '.' . $ext;
-            $dados['photo']->storeAs('produtos', $imageName);
-            $dados['photo'] = $imageName;
+        if ($data) {
+            $this->service->store($data);
+
+            return redirect()->route('product.index')
+                ->with("alert", "O Produto foi adicionado com sucesso !");
         }
-
-        $dados['current_stock'] = 0;
-
-        User::find(Auth::id())->products()->create($dados);
-
-        return redirect()->route('product.index')->with("alert", "O Produto foi adicionado com sucesso !");
     }
 
     public function edit($id)
     {
-        $product = User::find(Auth::id())->products()->find($id);
+        $product = $this->service->findById($id);
 
         if ($product) {
-            return view('product.edit', ['product' => $product]);
+            $this->authorize('user-product', $product);
+            
+            return view('product.edit', compact('product'));
         }
 
         abort('404');
@@ -65,22 +55,19 @@ class ProductController extends Controller
 
     public function editAction(ProductRequest $request, $id)
     {
-        $product = User::find(Auth::id())->products()->find($id);
-
+        $product = $this->service->findById($id);
+        
         if ($product) {
-            $dados = $request->all();
+            $this->authorize('user-product', $product);
+    
+            $data = $request->validated();
 
-            if ($request->hasFile('photo')) {
-                $ext = $dados['photo']->extension();
-                $imageName = time() . '.' . $ext;
-                $dados['photo']->storeAs('produtos', $imageName);
-                $dados['photo'] = $imageName;
-                Storage::delete('produtos/' . $product->photo);
+            if ($data) {
+                $this->service->update($product, $data);
             }
 
-            $product->update($dados);
-
-            return redirect()->route('product.index')->with("alert", "O Produto de código {$product->code} foi atualizado com sucesso !");
+            return redirect()->route('product.index')
+                ->with("alert", "O Produto de código {$product->code} foi atualizado com sucesso !");
         }
 
         abort('404');
@@ -88,39 +75,36 @@ class ProductController extends Controller
 
     public function delete(Request $request)
     {
-        $product = User::find(Auth::id())->products()->find($request->id);
+        $product = $this->service->findById($request->id);
 
         if ($product) {
-            $movements = $product->movements;
-
-            foreach ($movements as $m) {
-                $movement = Movement::find($m->pivot->movement_id);
-                $movement['total'] -= $m->pivot->quantity * $m->pivot->value;
-                $movement->update();
-                MovementProduct::find($m->pivot->id)->delete();
-            }
-            Storage::delete('produtos/' . $product->photo);
-            $product->delete();
+            $this->authorize('user-product', $product);
+        
+            $this->service->delete($product['id']);
         }
     }
 
     public function deletePhoto(Request $request)
     {
-        $product = User::find(Auth::id())->products()->find($request->id);
+        $product = $this->service->findById($request->id);
+
         if ($product) {
-            Storage::delete('produtos/' . $product->photo);
-            $product['photo'] = '';
-            $product->update();
+            $this->authorize('user-product', $product);
+
+            $this->service->deletePhoto($product['id']);
         }
     }
 
     public function downloadPhoto($id)
     {
-        $product = User::find(Auth::id())->products()->find($id);
-        if (!empty($product->photo)) {
-            $imageName = $product->name . '_' . $product->photo;
-            return Storage::download('produtos/' . $product->photo, $imageName);
-        } 
+        $product = $this->service->findById($id);
+        
+        if ($product) {
+            $this->authorize('user-product', $product);
+            
+            $this->service->downloadPhoto($id);
+        }
+
         abort('404');
     }
 }
