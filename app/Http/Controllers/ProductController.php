@@ -53,9 +53,9 @@ class ProductController extends Controller
         abort('404');
     }
 
-    public function editAction(ProductRequest $request, $id)
+    public function editAction(ProductRequest $request)
     {
-        $product = $this->service->findById($id);
+        $product = $this->service->findById($request->id);
         
         if ($product) {
             $this->authorize('user-product', $product);
@@ -64,10 +64,10 @@ class ProductController extends Controller
 
             if ($data) {
                 $this->service->update($product, $data);
+                return redirect()->route('product.index')
+                    ->with("alert", "O Produto de código {$product->code} foi atualizado com sucesso !");
             }
 
-            return redirect()->route('product.index')
-                ->with("alert", "O Produto de código {$product->code} foi atualizado com sucesso !");
         }
 
         abort('404');
@@ -102,7 +102,7 @@ class ProductController extends Controller
         if ($product) {
             $this->authorize('user-product', $product);
             
-            $this->service->downloadPhoto($id);
+            return $this->service->downloadPhoto($product['id']);
         }
 
         abort('404');

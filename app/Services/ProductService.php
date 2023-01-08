@@ -92,7 +92,5 @@ class ProductService
             $imageName = $product->name . '_' . $product->photo;
             return Storage::download('produtos/' . $product->photo, $imageName);
         } 
-
-        abort(404);
     }
 }

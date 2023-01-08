@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="container">
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('product.editAction') }}" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="id" value="{{ isset($product->id) ? $product->id : '' }}">
         <div class="d-flex flex-column align-items-center">

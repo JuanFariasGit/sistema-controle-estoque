@@ -39,13 +39,13 @@
             <tr>
                 <td>{{ $row->code }}</td>
                 <td>
-                    <img width="200" src="{{ asset('imagens/produtos/' . $row->photo) }}">
+                    <img width="150" src="{{ asset('imagens/produtos/' . $row->photo) }}">
                 </td>
                 <td>{{ $row->name }}</td>
                 <td>{{ $row->capacity }}</td>
                 <td>{{ $row->current_stock }}</td>
-                <td>
-                    <a href="{{ route('product.edit', $row->id) }}">
+                <td class="d-flex align-items-center justify-content-center">
+                    <a class="nav-link" href="{{ route('product.edit', $row->id) }}">
                         <button class="btn btn-sm btn-primary mx-1">
                             <i class="far fa-edit fa-lg"></i>
                         </button>
@@ -57,6 +57,11 @@
                     >
                         <i class="far fa-trash-alt fa-lg"></i>
                     </button>
+                    <a class="nav-link" href="{{ route('product.download-photo', $row->id) }}">
+                        <button class="btn btn-sm btn-primary mx-1">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </a>
                 </td>
             </tr>
             @endcan
