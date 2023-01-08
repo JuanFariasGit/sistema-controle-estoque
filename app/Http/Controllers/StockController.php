@@ -9,14 +9,18 @@ use App\Models\Movement;
 use App\Models\Product;
 use App\Models\MovementProduct;
 use App\Models\User;
+use App\Services\ProductService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class StockController extends Controller
 {
-    public function __construct()
+    private $productService;
+
+    public function __construct(ProductService $productService)
     {
         $this->middleware(['auth']);
+        $this->productService = $productService;
     }
 
     public function index()
@@ -31,9 +35,9 @@ class StockController extends Controller
         return ['data' => $movements];
     }
 
-    public function add(Request $request)
+    public function add()
     {
-        $products = User::find(Auth::id())->products()->get();
+        $products = $this->productService->findAll();
 
         return view('stock.add', ['products' => $products]);
     }
