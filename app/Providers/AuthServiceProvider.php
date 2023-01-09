@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Movement;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,10 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('user-product', function (User $user, Product $product) {
             return $user->id === $product->user_id;
+        });
+
+        Gate::define('user-movement', function (User $user, Movement $movement) {
+            return $user->id === $movement->user_id;
         });
     }
 }

@@ -9,6 +9,8 @@ use App\Models\Movement;
 use App\Models\Product;
 use App\Models\MovementProduct;
 use App\Models\User;
+use App\Services\MovementProductService;
+use App\Services\MovementService;
 use App\Services\ProductService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -16,11 +18,18 @@ use Illuminate\Support\Facades\Validator;
 class StockController extends Controller
 {
     private $productService;
+    private $movementService;
+    private $movementProductService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(
+        ProductService $productService,
+        MovementService $movementService,
+        MovementProductService $movementProductService)
     {
         $this->middleware(['auth']);
         $this->productService = $productService;
+        $this->movementService = $movementService;
+        $this->movementProductService = $movementProductService;
     }
 
     public function index()
@@ -30,7 +39,7 @@ class StockController extends Controller
 
     public function findAll()
     {
-        $movements = User::find(Auth::id())->movements()->get();
+        $movements = $this->movementService->findAll();
 
         return ['data' => $movements];
     }
@@ -44,15 +53,16 @@ class StockController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $movement = User::find(Auth::id())->movements()->find($id);
+        $movement = $this->movementService->findByIdRelationships($id, 'products');
 
         if ($movement) {
-            $products = User::find(Auth::id())->products()->get();
-
-            $movementProducts = MovementProduct::where('movement_id', $id)->get();
-
-            return view('stock.edit', ['products' => $products, 'movement' => $movement, 'movementProducts' => $movementProducts]);
+            $this->authorize('user-movement', $movement);
+            
+            $products = $movement->products;
+    
+            return view('stock.edit', ['products' => $products, 'movement' => $movement]);
         }
+
         abort('404');
     }
 
