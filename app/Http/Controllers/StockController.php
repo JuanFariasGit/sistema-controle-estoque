@@ -79,12 +79,9 @@ class StockController extends Controller
                 ->withInput();
         }
 
-        $data['user_id'] = $request->user()->id;
-        $data['total'] = $this->movementProductService->getTotal($data['quantities'], $result['valuesNumberFormat']);
-
         $movement = $this->movementService->store($data);
 
-        $this->movementProductService->save($movement->id, $data['idProducts'], $data['quantities'], $result['valuesNumberFormat']);
+        $this->movementProductService->save($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação adicionada com sucesso !');
     }
@@ -107,12 +104,9 @@ class StockController extends Controller
                     ->withInput();
             }
 
-            $data['user_id'] = $request->user()->id;
-            $data['total'] = $this->movementProductService->getTotal($data['quantities'], $result['valuesNumberFormat']);
+            $this->movementService->update($data, $movement['id']);
 
-            $movement->update($data);
-
-            $this->movementProductService->save($movement->id, $data['idProducts'], $data['quantities'], $result['valuesNumberFormat']);
+            $this->movementProductService->save($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
         }
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação atualizada com sucesso !');

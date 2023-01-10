@@ -35,18 +35,7 @@ class MovementProductService
             }
         }
 
-        return ['status' => false, 'valuesNumberFormat' => $valuesNumberFormat];
-    }
-
-    public function getTotal($quantities, $values)
-    {
-        $total = 0;
-
-        for ($i = 0; $i < count($quantities); $i++) {
-            $total += intval($quantities[$i]) * floatval($values[$i]);
-        }
-
-        return $total;
+        return ['status' => false];
     }
 
     public function save($movementId, $productsId, $quantities, $values)
@@ -57,17 +46,18 @@ class MovementProductService
         for ($i = 0; $i < count($quantities); $i++) {
             $prevQuantity = 0;
             $product = $this->productRepository->findById($productsId[$i]);
-
+            $values[$i] = str_replace(',', '.', $values[$i]);
+            
             if (in_array($productsId[$i], $products)) {
                 $prevQuantity = $product->current_stock;
                 $movement->products()->updateExistingPivot($productsId[$i], [
                     'quantity' => $quantities[$i],
-                    'value' => $values[$i]
+                    'value' => floatval($values[$i])
                 ]);
             } else {
                 $movement->products()->attach($productsId[$i], [
                     'quantity' => $quantities[$i],
-                    'value' => $values[$i]
+                    'value' => floatval($values[$i])
                 ]);
             }
 

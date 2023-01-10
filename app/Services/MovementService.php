@@ -30,11 +30,29 @@ class MovementService
 
     public function store($data) 
     {
+        $data['user_id'] = auth()->id();
+        $data['total'] = $this->getTotal($data['quantities'], $data['values']);
+        
         return  $this->movementRepository->save($data);
     }
 
-    public function update($id, $data) 
+    public function update($data, $id) 
     {
+        $data['user_id'] = auth()->id();
+        $data['total'] = $this->getTotal($data['quantities'], $data['values']);
+
         $this->movementRepository->save($data, $id);       
+    }
+
+    private function getTotal($quantities, $values)
+    {
+        $total = 0;
+
+        for ($i = 0; $i < count($quantities); $i++) {
+            $values[$i] = str_replace(',', '.', $values[$i]);
+            $total += intval($quantities[$i]) * floatval($values[$i]);
+        }
+
+        return $total;
     }
 }
