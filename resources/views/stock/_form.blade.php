@@ -34,27 +34,48 @@
     <h5>Produto(s)</h5>
     <hr>
     <div id="products" class="row justify-content-center">
-        @if (isset($products))
-            @foreach ($products as $product)
-                <div class="col-md-4">
-                    <label>Nome:</label>
-                    <select class="form-control" name="idProducts[]">
-                        <option></option>
-                            <option value="{{ $product->id }}" {{ isset($product->pivot->product_id) && $product->pivot->product_id == $product->id ? 'selected' : ''}}>
-                                {{ $product->name }}
-                            </option>
-                        
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label>Quantidade:</label>
-                    <input class="form-control" type="text" name="quantities[]" value="{{ isset($product->pivot->quantity) ? $product->pivot->quantity : '' }}">
-                </div>
-                <div class="col-md-4">
-                    <label>Valor unitário (R$):</label>
-                    <input class="form-control value" type="text" name="values[]" value="{{ isset($product->pivot->value) ? str_replace('.', ',', $product->pivot->value) : '' }}">
-                </div>
+        @if (isset($movement))
+            @foreach($movement->products as $movementProduct)
+            <div class="col-md-4">
+                <label>Nome:</label>
+                <select class="form-control" name="idProducts[]">
+                    <option></option>
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}" {{ $movementProduct->pivot->product_id == $product->id ? 'selected' : ''}}>
+                            {{ $product->name }}
+                        </option>
+                        @endforeach       
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Quantidade:</label>
+                <input class="form-control" type="text" name="quantities[]" value="{{ isset($movementProduct->pivot->quantity) ? $movementProduct->pivot->quantity : '' }}">
+            </div>
+            <div class="col-md-4">
+                <label>Valor unitário (R$):</label>
+                <input class="form-control value" type="text" name="values[]" value="{{ isset($movementProduct->pivot->value) ? str_replace('.', ',', $movementProduct->pivot->value) : '' }}">
+            </div>
             @endforeach
+        @else 
+            <div class="col-md-4">
+                <label>Nome:</label>
+                <select class="form-control" name="idProducts[]">
+                    <option></option>
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}">
+                            {{ $product->name }}
+                        </option>
+                        @endforeach       
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Quantidade:</label>
+                <input class="form-control" type="text" name="quantities[]" value="{{ isset($product->pivot->quantity) ? $product->pivot->quantity : '' }}">
+            </div>
+            <div class="col-md-4">
+                <label>Valor unitário (R$):</label>
+                <input class="form-control value" type="text" name="values[]" value="{{ isset($product->pivot->value) ? str_replace('.', ',', $product->pivot->value) : '' }}">
+            </div>
         @endif
     </div>
     <button type="button" class="btn btn-sm btn-primary my-3" onclick="addProduct()">

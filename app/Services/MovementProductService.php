@@ -38,7 +38,7 @@ class MovementProductService
         return ['status' => false];
     }
 
-    public function save($movementId, $productsId, $quantities, $values)
+    public function createOrUpdate($movementId, $productsId, $quantities, $values)
     {
         $movement = $this->movementRepository->findById($movementId);
         $products = $movement->products()->get()->pluck('id')->toArray();

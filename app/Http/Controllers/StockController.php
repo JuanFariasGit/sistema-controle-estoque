@@ -58,8 +58,8 @@ class StockController extends Controller
         if ($movement) {
             $this->authorize('user-movement', $movement);
             
-            $products = $movement->products;
-    
+            $products = $this->productService->findAll();
+            
             return view('stock.edit', ['products' => $products, 'movement' => $movement]);
         }
 
@@ -81,7 +81,7 @@ class StockController extends Controller
 
         $movement = $this->movementService->store($data);
 
-        $this->movementProductService->save($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
+        $this->movementProductService->createOrUpdate($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação adicionada com sucesso !');
     }
@@ -106,7 +106,7 @@ class StockController extends Controller
 
             $this->movementService->update($data, $movement['id']);
 
-            $this->movementProductService->save($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
+            $this->movementProductService->createOrUpdate($movement['id'], $data['idProducts'], $data['quantities'], $data['values']);
         }
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação atualizada com sucesso !');
