@@ -72,4 +72,22 @@ class MovementProductService
             $product->update();
         }
     }
+
+    public function delete($id)
+    {
+        $movement = $this->movementRepository->findByIdRelationships($id, 'products');
+
+        foreach ($movement->products as $product) {
+            
+            if ($movement->type == 'entry') {
+                $product->current_stock -= intval($product->pivot['quantity']);
+            } else {
+                $product->current_stock += intval($product->pivot['quantity']);
+            }
+
+            $product->update();
+            $movement->products()->detach($product['id']);
+        }
+
+    }
 }

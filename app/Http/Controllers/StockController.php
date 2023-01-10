@@ -114,11 +114,12 @@ class StockController extends Controller
 
     public function delete(Request $request)
     {
-        $movement = Movement::where('user_id', $request->user()->id)
-        ->where('id', $request->id)->first();
+        $movement = $this->movementService->findById($request->id);
 
         if ($movement) {
-            $this->deleteProductMovements($request->id);
+            $this->authorize('user-movement', $movement);
+
+            $this->movementProductService->delete($request->id);
             $movement->delete();
         }
     }
@@ -128,24 +129,5 @@ class StockController extends Controller
         $movement = Movement::where('user_id', $request->user()->id)->where('id', $id)->first();
         $products = DB::select('select p.code, p.name, mp.quantity, mp.value from products p inner join movement_products mp on p.id = mp.product_id inner join movements m on m.id = mp.movement_id where m.id = ?', [$id]);
         return ['movement' => $movement, 'products' => $products];
-    }
-
-    private function deleteProductMovements($id)
-    {
-        $movementProducts = MovementProduct::where('movement_id', $id)->get();
-        $movement = Movement::find($id);
-
-        foreach ($movementProducts as $movementProduct) {
-            $product = Product::find($movementProduct['product_id']);
-
-            if ($movement->type == 'entry') {
-                $product->current_stock -= intval($movementProduct['quantity']);
-            } else {
-                $product->current_stock += intval($movementProduct['quantity']);
-            }
-
-            $product->update();
-            $movementProduct->delete();
-        }
     }
 }
