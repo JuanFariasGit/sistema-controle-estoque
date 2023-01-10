@@ -68,9 +68,9 @@ class StockController extends Controller
 
     public function addAction(MovementRequest $request)
     {
-        $dados = $request->all();
+        $data = $request->all();
 
-        $result = $this->validateProductMovement($dados['idProducts'], $dados['quantities'], $dados['values']);
+        $result = $this->movementProductService->validate($data['idProducts'], $data['quantities'], $data['values']);
         
         if ($result['status']) {
             return redirect()
@@ -79,39 +79,40 @@ class StockController extends Controller
                 ->withInput();
         }
 
-        $dados['user_id'] = $request->user()->id;
-        $dados['total'] = $this->getTotal($dados['quantities'], $result['valuesNumberFormat']);
+        $data['user_id'] = $request->user()->id;
+        $data['total'] = $this->movementProductService->getTotal($data['quantities'], $result['valuesNumberFormat']);
 
-        $movement = Movement::create($dados);
+        $movement = $this->movementService->store($data);
 
-        $this->createOrUpdateProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
+        $this->movementProductService->save($movement->id, $data['idProducts'], $data['quantities'], $result['valuesNumberFormat']);
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação adicionada com sucesso !');
     }
 
     public function editAction(MovementRequest $request)
     {
-        $movement = Movement::where('user_id', $request->user()->id)
-            ->where('id', $request->id)->first();
+        $movement = $this->movementService->findById($request->id);
 
         if ($movement) {
-            $dados = $request->all();
+            $this->authorize('user-movement', $movement);
 
-            $result = $this->validateProductMovement($dados['idProducts'], $dados['quantities'], $dados['values']);
+            $data = $request->all();
+
+            $result = $this->movementProductService->validate($data['idProducts'], $data['quantities'], $data['values']);
 
             if ($result['status']) {
                 return redirect()
-                    ->action('StockController@edit', $dados['id'])
+                    ->action('StockController@edit', $data['id'])
                     ->withErrors($result['validator'], 'products')
                     ->withInput();
             }
 
-            $dados['user_id'] = $request->user()->id;
-            $dados['total'] = $this->getTotal($dados['quantities'], $result['valuesNumberFormat']);
+            $data['user_id'] = $request->user()->id;
+            $data['total'] = $this->movementProductService->getTotal($data['quantities'], $result['valuesNumberFormat']);
 
-            $movement->update($dados);
+            $movement->update($data);
 
-            $this->createOrUpdateProductMovement($movement->id, $dados['idProducts'], $dados['quantities'], $result['valuesNumberFormat']);
+            $this->movementProductService->save($movement->id, $data['idProducts'], $data['quantities'], $result['valuesNumberFormat']);
         }
 
         return redirect()->route('stock.index')->with('alert', 'Movimentação atualizada com sucesso !');
@@ -133,69 +134,6 @@ class StockController extends Controller
         $movement = Movement::where('user_id', $request->user()->id)->where('id', $id)->first();
         $products = DB::select('select p.code, p.name, mp.quantity, mp.value from products p inner join movement_products mp on p.id = mp.product_id inner join movements m on m.id = mp.movement_id where m.id = ?', [$id]);
         return ['movement' => $movement, 'products' => $products];
-    }
-
-    private function validateProductMovement($idProducts, $quantities, $values)
-    {
-        for ($i = 0; $i < count($idProducts); $i++) {
-            $valuesNumberFormat[$i] = str_replace(',', '.', $values[$i]);
-            
-            $input = ['product_id' => $idProducts[$i], 'quantity' => $quantities[$i], 'value' => $valuesNumberFormat[$i]];
-
-            $rules = ['product_id' => 'required|max:100', 'quantity' => 'required|integer', 'value' => 'required|numeric'];
-
-            $validator = Validator::make($input, $rules);
-
-            if ($validator->fails()) {
-                return ['status' => true, 'validator' => $validator];
-            }
-        }
-        return ['status' => false, 'valuesNumberFormat' => $valuesNumberFormat];
-    }
-
-    private function getTotal($quantities, $values)
-    {
-        $total = 0;
-
-        for ($i = 0; $i < count($quantities); $i++) {
-            $total += intval($quantities[$i]) * floatval($values[$i]);
-        }
-
-        return $total;
-    }
-
-    private function createOrUpdateProductMovement($movementId, $productsId, $quantities, $values)
-    {
-        $movement = Movement::find($movementId);
-        $products = $movement->products()->get()->pluck('id')->toArray();
-        
-        for ($i = 0; $i < count($quantities); $i++) {
-            $prevQuantity = 0;
-            $product = Product::find($productsId[$i]);
-            
-            if (in_array($productsId[$i], $products)) {
-                $prevQuantity = $product->current_stock;
-                $movement->products()->updateExistingPivot($productsId[$i], [
-                    'quantity' => $quantities[$i],
-                    'value' => $values[$i]
-                ]);
-            } else {
-                $movement->products()->attach($productsId[$i], [
-                    'quantity' => $quantities[$i],
-                    'value' => $values[$i]
-                ]); 
-            }
-            
-            if ($movement->type == 'entry') {
-                $product->current_stock += intval($quantities[$i]);
-            } else {
-                $product->current_stock -= intval($quantities[$i]);
-            }
-
-            $product->current_stock = $product->current_stock - $prevQuantity;
-
-            $product->update();
-        }
     }
 
     private function deleteProductMovements($id)

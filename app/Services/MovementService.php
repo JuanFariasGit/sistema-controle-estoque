@@ -27,4 +27,14 @@ class MovementService
     {
         return $this->movementRepository->findByIdRelationships($id, $functionsNameRelationships);
     }
+
+    public function store($data) 
+    {
+        return  $this->movementRepository->save($data);
+    }
+
+    public function update($id, $data) 
+    {
+        $this->movementRepository->save($data, $id);       
+    }
 }
