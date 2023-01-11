@@ -32,9 +32,4 @@ abstract class AbstractRepository
     {
         return $this->model->updateOrCreate(['id' => $id], $data);
     }
-
-    public function destroy($id)
-    {
-        $this->model::find($id)->delete();
-    }
 }

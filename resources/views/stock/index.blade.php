@@ -35,6 +35,7 @@
         <tbody>
             @php $types = ['entry' => 'Entrada', 'exit' => 'Sáida'] @endphp
             @foreach($movements as $movement)
+            @can('user-movement', $movement)
             <tr>
                 <td>{{ $movement->date_time }}</td>
                 <td>{{ $types[$movement->type] }}</td>
@@ -42,8 +43,16 @@
                 <td>R$ {{ number_format($movement->total, 2, ',', '.') }}</td>
                 <td>
                 <button class="btn btn-sm btn-success mx-1" onclick="viewMovementModal('{{ $movement->id }}')"><i class="far fa-eye fa-lg"></i></button>
+                <a href="{{ route('stock.edit', $movement->id) }}"><button class="btn btn-sm btn-primary mx-1">
+                    <i class="far fa-edit fa-lg"></i>
+                    </button>
+                </a>
+                <button id="row_{{ $movement->id }}" class="btn btn-sm btn-danger mx-1" onclick="deleteMovementModal('{{ $movement->id }}', '{{ $movement->date_time }}')">
+                    <i class="far fa-trash-alt fa-lg"></i>
+                </button>
                 </td>
             </tr>
+            @endcan
             @endforeach
         </tbody>
     </table>
