@@ -45,7 +45,7 @@
                 <td>{{ $row->capacity }}</td>
                 <td>{{ $row->current_stock }}</td>
                 <td class="d-flex align-items-center justify-content-center">
-                    <a class="nav-link" href="{{ route('product.edit', $row->id) }}">
+                    <a class="nav-link p-0" href="{{ route('product.edit', $row->id) }}">
                         <button class="btn btn-sm btn-primary mx-1">
                             <i class="far fa-edit fa-lg"></i>
                         </button>
@@ -57,7 +57,7 @@
                     >
                         <i class="far fa-trash-alt fa-lg"></i>
                     </button>
-                    <a class="nav-link" href="{{ route('product.download-photo', $row->id) }}">
+                    <a class="nav-link p-0" href="{{ route('product.download-photo', $row->id) }}">
                         <button class="btn btn-sm btn-primary mx-1">
                             <i class="fas fa-download"></i>
                         </button>

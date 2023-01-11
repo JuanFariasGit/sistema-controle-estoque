@@ -22,7 +22,31 @@
                 <i class="fas fa-plus-circle fa-lg"></i>
             </button></a>
     </div>
-    <table id="movements" class="table table-striped table-bordered text-center"></table>
+    <table id="movements" class="table table-striped table-bordered text-center">
+        <thead>
+            <tr>
+                <th>Data e Hora</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $types = ['entry' => 'Entrada', 'exit' => 'Sáida'] @endphp
+            @foreach($movements as $movement)
+            <tr>
+                <td>{{ $movement->date_time }}</td>
+                <td>{{ $types[$movement->type] }}</td>
+                <td>{{ $movement->description }}</td>
+                <td>R$ {{ number_format($movement->total, 2, ',', '.') }}</td>
+                <td>
+                <button class="btn btn-sm btn-success mx-1" onclick="viewMovementModal('{{ $movement->id }}')"><i class="far fa-eye fa-lg"></i></button>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 <div id="modal" class="modal fade" role="dialog" data-backdrop="static">
     <div class="modal-dialog">
@@ -60,57 +84,6 @@
             "targets": [4],
             "orderable": false
         }],
-        "ajax": {
-            "method": "POST",
-            "url": "{{ route('stock.index') }}",
-            "headers": {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-            }
-        },
-        "columns": [{
-                "title": "Data e Hora",
-                "data": "date_time",
-                "render": function(dateTime) {
-                    return formatDateTime(dateTime)
-                }
-            },
-            {
-                "title": "Tipo",
-                "data": "type",
-                "render": function(type) {
-                    if (type == 'entry') {
-                        return 'Entrada'
-                    }
-                    return 'Saída'
-                }
-            },
-            {
-                "title": "Descrição",
-                "data": "description"
-            },
-            {
-                "title": "Total",
-                "data": "total",
-                "render": function(total) {
-                    return formatPrice(total)
-                }
-            },
-            {
-                "title": "Ações",
-                "data": function(data) {
-                    let urlEdit = "{{ route('stock.edit', ':id') }}"
-
-                    html = `<button class="btn btn-sm btn-success mx-1" onclick="viewMovementModal('${data.id}')"><i class="far fa-eye fa-lg"></i></button>`
-                    html += `<a href="${urlEdit.replace(':id', data.id)}"><button class="btn btn-sm btn-primary mx-1">
-                    <i class="far fa-edit fa-lg"></i>
-                    </button></a>`
-                    html += `<button id="row_${data.id}" class="btn btn-sm btn-danger mx-1" onclick="deleteMovementModal('${data.id}', '${data.date_time}')">
-                        <i class="far fa-trash-alt fa-lg"></i>
-                    </button>`
-                    return html
-                }
-            }
-        ],
         "language": {
             "infoFiltered": "(filtrado do total de _MAX_ entradas)",
             "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
@@ -180,7 +153,7 @@
                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
             },
             success: function(resp) {
-                const tipos = {
+                const types = {
                     "entry": "Entrada",
                     "exit": "Saída"
                 }
@@ -188,20 +161,19 @@
                 movement_html = `
                 <p><strong>Data e Hora:</strong> ${formatDateTime(resp.movement.date_time)}</p>
                 <p><strong>Descrição:</strong> ${resp.movement.description}</p>
-                <p><strong>Tipo:</strong> ${tipos[resp.movement.type]}</p>
+                <p><strong>Tipo:</strong> ${types[resp.movement.type]}</p>
                 <p><strong>Total:</strong> ${formatPrice(resp.movement.total)}</p> 
                 `
-                $('#modal-view').find('.modal-body').html(`<p>Data e Hora: ${formatDateTime(resp.movement.date_time)}</p>`)
                 products_html = '<strong>Produtos</strong>'
                 let i = 0
                 const len = resp.products.length
-                for (let p of resp.products) {
+                for (let p of resp.movement.products) {
                     products_html += `
                     <p>Código: ${p.code}</p>
                     <p>Nome: ${p.name}</p>
-                    <p>Quatidade: ${p.quantity}</p>
-                    <p>Valor: ${formatPrice(p.value)}</p>
-                    <p>Subtotal: ${formatPrice(p.value * p.quantity)}</p>
+                    <p>Quatidade: ${p.pivot.quantity}</p>
+                    <p>Valor: ${formatPrice(p.pivot.value)}</p>
+                    <p>Subtotal: ${formatPrice(p.pivot.value * p.pivot.quantity)}</p>
                     `
                     i++
                     if (i < len) {

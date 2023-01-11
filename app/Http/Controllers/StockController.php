@@ -34,14 +34,9 @@ class StockController extends Controller
 
     public function index()
     {
-        return view('stock.index');
-    }
-
-    public function findAll()
-    {
         $movements = $this->movementService->findAll();
 
-        return ['data' => $movements];
+        return view('stock.index', ['movements' => $movements]);
     }
 
     public function add()
@@ -126,8 +121,16 @@ class StockController extends Controller
 
     public function viewMovement(Request $request, $id)
     {
-        $movement = Movement::where('user_id', $request->user()->id)->where('id', $id)->first();
-        $products = DB::select('select p.code, p.name, mp.quantity, mp.value from products p inner join movement_products mp on p.id = mp.product_id inner join movements m on m.id = mp.movement_id where m.id = ?', [$id]);
-        return ['movement' => $movement, 'products' => $products];
+        $movement = $this->movementService->findByIdRelationships($id, 'products');
+        
+        if ($movement) {
+            $this->authorize('user-movement', $movement);
+
+            $products = $movement->products(); 
+            
+            return ['movement' => $movement, 'products' => $products];
+        }
+        
+        abort(404);
     }
 }
