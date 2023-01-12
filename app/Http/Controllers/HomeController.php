@@ -2,45 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\MovementProduct;
+use App\Services\MovementService;
 
 class HomeController extends Controller
 {
-    public function __construct()
+    private $movementService;
+
+    public function __construct(MovementService $movementService)
     {
         $this->middleware(['auth']);
+        $this->movementService = $movementService;
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $productMovementEntry = MovementProduct::join('movements', 'movement_products.movement_id', 'movements.id')
-        ->join('products', 'movement_products.product_id', 'products.id')->select(['products.name', 'movement_products.quantity'])
-        ->where('movements.type', 'entry')->where('movements.user_id', $request->user()->id)
-        ->groupBy('products.name', 'movement_products.quantity')->get();
-
-        $productMovementExit = MovementProduct::join('movements', 'movement_products.movement_id', 'movements.id')
-        ->join('products', 'movement_products.product_id', 'products.id')->select(['products.name', 'movement_products.quantity'])
-        ->where('movements.type', 'exit')->where('movements.user_id', $request->user()->id)
-        ->groupBy('products.name', 'movement_products.quantity')->get();
-
+        $movementEntry = $this->movementService->findAllRelationships('products')->where('type', 'entry');
+            
+        $movementExit =  $this->movementService->findAllRelationships('products')->where('type', 'exit');
+            
         $entryPie = [];
         $entryTotal = 0;
         $exitPie = [];
         $exitTotal = 0;
+    
+        $movementEntry->each(function($movement) use(&$entryPie, &$entryTotal) {
+            $this->authorize('user-movement', $movement);
 
-        foreach ($productMovementEntry as $pme) {
-            $entryPie[ $pme['name'] ] = $pme['quantity'];
-            $entryTotal += intval($pme['quantity']);
-        }
+            foreach ($movement->products as $product) {
+                $entryPie[ $product['name'] ] = $product['pivot']['quantity'];
+                $entryTotal += intVal($product['pivot']['quantity']);
+            }
+        });
 
         $entryLabels = json_encode(array_keys($entryPie));
         $entryValues = json_encode(array_values($entryPie));
+        
+        $movementExit->each(function($movement) use(&$exitPie, &$exitTotal) {
+            $this->authorize('user-movement', $movement);
 
-        foreach ($productMovementExit as $pme) {
-            $exitPie[ $pme['name'] ] = $pme['quantity'];
-            $exitTotal += intVal($pme['quantity']);
-        }
+            foreach ($movement->products as $product) {
+                $exitPie[ $product['name'] ] = $product['pivot']['quantity'];
+                $exitTotal += intVal($product['pivot']['quantity']);
+            }
+        });
 
         $exitLabels = json_encode(array_keys($exitPie));
         $exitValues = json_encode(array_values($exitPie));

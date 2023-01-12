@@ -18,6 +18,11 @@ abstract class AbstractRepository
         return $this->model::all();
     }
 
+    public function findAllRelationships($functionsNameRelationships)
+    {
+        return $this->model::with($functionsNameRelationships)->get();
+    }
+
     public function findById($id)
     {
         return $this->model::find($id);

@@ -18,6 +18,11 @@ class MovementService
         return $this->movementRepository->findAll();
     }
 
+    public function findAllRelationships($functionsNameRelationships)
+    {
+        return $this->movementRepository->findAllRelationships($functionsNameRelationships);
+    }
+
     public function findById($id)
     {
         return $this->movementRepository->findById($id);

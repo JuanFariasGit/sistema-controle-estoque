@@ -3,17 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\MovementRequest;
-use App\Models\Movement;
-use App\Models\Product;
-use App\Models\MovementProduct;
-use App\Models\User;
 use App\Services\MovementProductService;
 use App\Services\MovementService;
 use App\Services\ProductService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class StockController extends Controller
 {
@@ -46,7 +39,7 @@ class StockController extends Controller
         return view('stock.add', ['products' => $products]);
     }
 
-    public function edit(Request $request, $id)
+    public function edit($id)
     {
         $movement = $this->movementService->findByIdRelationships($id, 'products');
 
@@ -119,7 +112,7 @@ class StockController extends Controller
         }
     }
 
-    public function viewMovement(Request $request, $id)
+    public function viewMovement($id)
     {
         $movement = $this->movementService->findByIdRelationships($id, 'products');
         

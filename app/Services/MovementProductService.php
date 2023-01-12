@@ -22,9 +22,9 @@ class MovementProductService
     public function validate($idProducts, $quantities, $values)
     {
         for ($i = 0; $i < count($idProducts); $i++) {
-            $valuesNumberFormat[$i] = str_replace(',', '.', $values[$i]);
+            $values[$i] = str_replace(',', '.', $values[$i]);
 
-            $input = ['product_id' => $idProducts[$i], 'quantity' => $quantities[$i], 'value' => $valuesNumberFormat[$i]];
+            $input = ['product_id' => $idProducts[$i], 'quantity' => $quantities[$i], 'value' => $values[$i]];
 
             $rules = ['product_id' => 'required|max:100', 'quantity' => 'required|integer', 'value' => 'required|numeric'];
 
