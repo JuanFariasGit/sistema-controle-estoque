@@ -12,7 +12,7 @@ class MovementProductService
     protected $movementRepository;
 
     public function __construct(
-        ProductRepository $productRepository, 
+        ProductRepository $productRepository,
         MovementRepository $movementRepository)
     {
         $this->productRepository = $productRepository;
@@ -41,25 +41,12 @@ class MovementProductService
     public function createOrUpdate($movementId, $productsId, $quantities, $values)
     {
         $movement = $this->movementRepository->findById($movementId);
-        $products = $movement->products()->get()->pluck('id')->toArray();
+        $movementProducts = [];
 
         for ($i = 0; $i < count($quantities); $i++) {
             $prevQuantity = 0;
             $product = $this->productRepository->findById($productsId[$i]);
             $values[$i] = str_replace(',', '.', $values[$i]);
-            
-            if (in_array($productsId[$i], $products)) {
-                $prevQuantity = $product->current_stock;
-                $movement->products()->updateExistingPivot($productsId[$i], [
-                    'quantity' => $quantities[$i],
-                    'value' => floatval($values[$i])
-                ]);
-            } else {
-                $movement->products()->attach($productsId[$i], [
-                    'quantity' => $quantities[$i],
-                    'value' => floatval($values[$i])
-                ]);
-            }
 
             if ($movement->type == 'entry') {
                 $product->current_stock += intval($quantities[$i]);
@@ -70,7 +57,15 @@ class MovementProductService
             $product->current_stock = $product->current_stock - $prevQuantity;
 
             $product->update();
+
+            array_push($movementProducts, [
+                'product_id' => $product['id'],
+                'quantity' => $quantities[$i],
+                'value' => floatval($values[$i])
+            ]);
         }
+
+        $movement->products()->sync($movementProducts);
     }
 
     public function delete($id)
@@ -78,7 +73,7 @@ class MovementProductService
         $movement = $this->movementRepository->findByIdRelationships($id, 'products');
 
         foreach ($movement->products as $product) {
-            
+
             if ($movement->type == 'entry') {
                 $product->current_stock -= intval($product->pivot['quantity']);
             } else {
