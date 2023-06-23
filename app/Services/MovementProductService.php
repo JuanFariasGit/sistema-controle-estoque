@@ -58,11 +58,10 @@ class MovementProductService
 
             $product->update();
 
-            array_push($movementProducts, [
-                'product_id' => $product['id'],
+            $movementProducts[$productsId[$i]] = [
                 'quantity' => $quantities[$i],
                 'value' => floatval($values[$i])
-            ]);
+            ];
         }
 
         $movement->products()->sync($movementProducts);
