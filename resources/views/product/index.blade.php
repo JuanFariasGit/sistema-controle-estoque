@@ -43,16 +43,16 @@
                 </td>
                 <td>{{ $row->name }}</td>
                 <td>{{ $row->capacity }}</td>
-                <td>{{ $row->current_stock }}</td>
+                <td>{{ $row->getQtInStock() }}</td>
                 <td class="d-flex align-items-center justify-content-center">
                     <a class="nav-link p-0" href="{{ route('product.edit', $row->id) }}">
                         <button class="btn btn-sm btn-primary mx-1">
                             <i class="far fa-edit fa-lg"></i>
                         </button>
                     </a>
-                    <button 
-                        id="row_{{ $row->id }}" 
-                        class="btn btn-sm btn-danger mx-1" 
+                    <button
+                        id="row_{{ $row->id }}"
+                        class="btn btn-sm btn-danger mx-1"
                         onclick="deleteProductModal('{{ $row->id }}', '{{ $row->name }}')"
                     >
                         <i class="far fa-trash-alt fa-lg"></i>

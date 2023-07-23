@@ -37,7 +37,7 @@
             @foreach($movements as $movement)
             @can('user-movement', $movement)
             <tr>
-                <td>{{ $movement->date_time }}</td>
+                <td>{!! date('d/m/Y H:i', strtotime($movement->date_time)) !!}</td>
                 <td>{{ $types[$movement->type] }}</td>
                 <td>{{ $movement->description }}</td>
                 <td>R$ {{ number_format($movement->total, 2, ',', '.') }}</td>
@@ -171,7 +171,7 @@
                 <p><strong>Data e Hora:</strong> ${formatDateTime(resp.movement.date_time)}</p>
                 <p><strong>Descrição:</strong> ${resp.movement.description}</p>
                 <p><strong>Tipo:</strong> ${types[resp.movement.type]}</p>
-                <p><strong>Total:</strong> ${formatPrice(resp.movement.total)}</p> 
+                <p><strong>Total:</strong> ${formatPrice(resp.movement.total)}</p>
                 `
                 products_html = '<strong>Produtos</strong>'
                 let i = 0

@@ -32,9 +32,9 @@ class ProductService
             $data['photo']->storeAs('produtos', $imageName);
             $data['photo'] = $imageName;
         }
-        
+
         $data['user_id'] = auth()->id();
-        
+
         $this->productRepository->save($data);
     }
 
@@ -51,23 +51,16 @@ class ProductService
         $data['user_id'] = auth()->id();
 
         $this->productRepository->save(
-            $data, 
+            $data,
             $product['id']
         );
     }
 
     public function delete($id)
     {
-        $product = $this->productRepository->findByIdRelationships($id, 'movements');
+        $product = $this->productRepository->findById($id);
 
         if ($product) {
-            $movements = $product->movements;
-
-            foreach ($movements as $m) {
-                $m->total -= ($m->pivot->quantity * $m->pivot->value);
-                $m->update();
-            }
-            
             Storage::delete('produtos/' . $product->photo);
             $product->delete();
         }
@@ -86,11 +79,11 @@ class ProductService
 
     public function downloadPhoto($id)
     {
-        $product = $this->productRepository->findById($id);   
-        
+        $product = $this->productRepository->findById($id);
+
         if (!empty($product->photo)) {
             $imageName = $product->name . '_' . $product->photo;
             return Storage::download('produtos/' . $product->photo, $imageName);
-        } 
+        }
     }
 }

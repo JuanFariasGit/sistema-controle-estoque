@@ -45,9 +45,9 @@ class StockController extends Controller
 
         if ($movement) {
             $this->authorize('user-movement', $movement);
-            
+
             $products = $this->productService->findAll();
-            
+
             return view('stock.edit', ['products' => $products, 'movement' => $movement]);
         }
 
@@ -59,7 +59,7 @@ class StockController extends Controller
         $data = $request->all();
 
         $result = $this->movementProductService->validate($data['idProducts'], $data['quantities'], $data['values']);
-        
+
         if ($result['status']) {
             return redirect()
                 ->action('StockController@add')
@@ -107,7 +107,6 @@ class StockController extends Controller
         if ($movement) {
             $this->authorize('user-movement', $movement);
 
-            $this->movementProductService->delete($request->id);
             $movement->delete();
         }
     }
@@ -115,15 +114,19 @@ class StockController extends Controller
     public function viewMovement($id)
     {
         $movement = $this->movementService->findByIdRelationships($id, 'products');
-        
+
         if ($movement) {
             $this->authorize('user-movement', $movement);
 
-            $products = $movement->products(); 
-            
-            return ['movement' => $movement, 'products' => $products];
+            $products = $movement->products();
+
+            return [
+                'movement' => $movement,
+                'products' => $products,
+                'movementTotal' => $movement->getTotal()
+            ];
         }
-        
+
         abort(404);
     }
 }

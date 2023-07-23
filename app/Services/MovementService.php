@@ -33,20 +33,27 @@ class MovementService
         return $this->movementRepository->findByIdRelationships($id, $functionsNameRelationships);
     }
 
-    public function store($data) 
+    public function store($data)
     {
         $data['user_id'] = auth()->id();
         $data['total'] = $this->getTotal($data['quantities'], $data['values']);
-        
+
         return  $this->movementRepository->save($data);
     }
 
-    public function update($data, $id) 
+    public function update($data, $id)
     {
         $data['user_id'] = auth()->id();
         $data['total'] = $this->getTotal($data['quantities'], $data['values']);
 
-        $this->movementRepository->save($data, $id);       
+        $this->movementRepository->save($data, $id);
+    }
+
+    public function delete($id)
+    {
+        $movement = $this->movementRepository->findById($id);
+
+        return $movement->delete($id);
     }
 
     private function getTotal($quantities, $values)

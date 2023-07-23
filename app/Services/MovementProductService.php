@@ -44,17 +44,8 @@ class MovementProductService
         $movementProducts = [];
 
         for ($i = 0; $i < count($quantities); $i++) {
-            $prevQuantity = 0;
             $product = $this->productRepository->findById($productsId[$i]);
             $values[$i] = str_replace(',', '.', $values[$i]);
-
-            if ($movement->type == 'entry') {
-                $product->current_stock += intval($quantities[$i]);
-            } else {
-                $product->current_stock -= intval($quantities[$i]);
-            }
-
-            $product->current_stock = $product->current_stock - $prevQuantity;
 
             $product->update();
 
@@ -65,23 +56,5 @@ class MovementProductService
         }
 
         $movement->products()->sync($movementProducts);
-    }
-
-    public function delete($id)
-    {
-        $movement = $this->movementRepository->findByIdRelationships($id, 'products');
-
-        foreach ($movement->products as $product) {
-
-            if ($movement->type == 'entry') {
-                $product->current_stock -= intval($product->pivot['quantity']);
-            } else {
-                $product->current_stock += intval($product->pivot['quantity']);
-            }
-
-            $product->update();
-            $movement->products()->detach($product['id']);
-        }
-
     }
 }
