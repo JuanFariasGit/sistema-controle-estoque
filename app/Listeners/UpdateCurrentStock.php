@@ -8,8 +8,11 @@ class UpdateCurrentStock
 {
     public function handle(CurrentStockEvent $event)
     {
-        $event->product->current_stock = $event->product->getQtInStock();
+        $products = $event->movement->products()->get();
 
-        $event->product->save();
+        foreach ($products as $product) {
+            $product->current_stock = $product->getQtInStock();
+            $product->save();
+        }
     }
 }

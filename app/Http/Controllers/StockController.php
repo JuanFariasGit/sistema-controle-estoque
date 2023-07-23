@@ -122,8 +122,7 @@ class StockController extends Controller
 
             return [
                 'movement' => $movement,
-                'products' => $products,
-                'movementTotal' => $movement->getTotal()
+                'products' => $products
             ];
         }
 

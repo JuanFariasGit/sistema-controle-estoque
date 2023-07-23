@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Movement;
 use App\Models\Product;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -12,11 +13,11 @@ class CurrentStockEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $product;
+    public $movement;
 
-    public function __construct(Product $product)
+    public function __construct(Movement $movement)
     {
-        $this->product = $product;
+        $this->movement = $movement;
     }
 
     public function broadcastOn()

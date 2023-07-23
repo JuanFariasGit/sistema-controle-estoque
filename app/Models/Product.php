@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Listeners\UpdateCurrentStock;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -10,10 +9,6 @@ class Product extends Model
     protected $fillable = ['code', 'name', 'capacity', 'photo', 'user_id'];
 
     public $timestamps = false;
-
-    protected $dispatchesEvents = [
-        'saved' => UpdateCurrentStock::class,
-    ];
 
     public function user()
     {
@@ -32,7 +27,11 @@ class Product extends Model
         $quantity = 0;
 
         foreach ($movements as $movement) {
-            $quantity += $movement->pivot->quantity;
+            if ($movement->type == 'entry') {
+                $quantity += $movement->pivot->quantity;
+            } else {
+                $quantity -= $movement->pivot->quantity;
+            }
         }
 
         return $quantity;

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\CurrentStockEvent;
+use App\Listeners\UpdateCurrentStock;
 use App\Repositories\ProductRepository;
 use App\Repositories\MovementRepository;
 use Illuminate\Support\Facades\Validator;
@@ -44,10 +46,7 @@ class MovementProductService
         $movementProducts = [];
 
         for ($i = 0; $i < count($quantities); $i++) {
-            $product = $this->productRepository->findById($productsId[$i]);
             $values[$i] = str_replace(',', '.', $values[$i]);
-
-            $product->update();
 
             $movementProducts[$productsId[$i]] = [
                 'quantity' => $quantities[$i],
@@ -56,5 +55,7 @@ class MovementProductService
         }
 
         $movement->products()->sync($movementProducts);
+
+        CurrentStockEvent::dispatch($movement);
     }
 }

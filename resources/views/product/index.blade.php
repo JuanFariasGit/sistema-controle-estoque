@@ -43,7 +43,7 @@
                 </td>
                 <td>{{ $row->name }}</td>
                 <td>{{ $row->capacity }}</td>
-                <td>{{ $row->getQtInStock() }}</td>
+                <td>{{ $row->current_stock }}</td>
                 <td class="d-flex align-items-center justify-content-center">
                     <a class="nav-link p-0" href="{{ route('product.edit', $row->id) }}">
                         <button class="btn btn-sm btn-primary mx-1">
