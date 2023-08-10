@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Events\CurrentStockEvent;
-use App\Listeners\UpdateCurrentStock;
 use App\Repositories\ProductRepository;
 use App\Repositories\MovementRepository;
 use Illuminate\Support\Facades\Validator;

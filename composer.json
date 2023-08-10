@@ -17,6 +17,7 @@
         "barryvdh/laravel-debugbar": "^3.6",
         "facade/ignition": "^1.16.15",
         "fakerphp/faker": "^1.9.1",
+        "laravel/dusk": "^6.25",
         "laravel/ui": "^1.0",
         "lucascudo/laravel-pt-br-localization": "^1.1",
         "mockery/mockery": "^1.0",
