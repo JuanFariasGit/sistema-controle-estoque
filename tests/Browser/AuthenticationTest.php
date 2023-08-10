@@ -23,4 +23,18 @@ class AuthenticationTest extends DuskTestCase
                     ->assertAuthenticated();
         });
     }
+
+    /**
+     * @test
+     */
+    public function ItAssertThatUserCanLogout()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs('juanfarias580@gmail.com')
+                    ->visit('/')
+                    ->clickLink('Juan de Oliveira Farias')
+                    ->clickLink('Sair')
+                    ->assertGuest();
+        });
+    }
 }
