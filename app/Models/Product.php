@@ -17,7 +17,7 @@ class Product extends Model
 
     public function movements()
     {
-        return $this->belongsToMany('App\Models\Movement', 'movement_products')
+        return $this->belongsToMany('App\Models\Movement', 'movement_products', 'product_id', 'movement_id')
         ->withPivot(['quantity', 'value']);
     }
 

@@ -36,7 +36,7 @@
     <hr>
     <div id="products">
         @if (isset($movement))
-            @foreach ($movement->products as $movementProduct)
+            @foreach ($movement->products as $key => $movementProduct)
                 <fieldset class="form-row border justify-content-center align-items-start my-2 py-2 rounded">
                     <div class="col-md-4">
                         <label>Nome:</label>
@@ -50,19 +50,21 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label>Quantidade:</label>
                         <input class="form-control" type="text" name="quantities[]"
                             value="{{ isset($movementProduct->pivot->quantity) ? $movementProduct->pivot->quantity : '' }}">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-{{ $key > 0 ? '3' : '4' }}">
                         <label>Valor unitário (R$):</label>
                         <input class="form-control value" type="text" name="values[]"
                             value="{{ isset($movementProduct->pivot->value) ? str_replace('.', ',', $movementProduct->pivot->value) : '' }}">
                     </div>
-                    <div class="col-md-2 d-flex justify-content-center">
+                    @if ($key > 0)
+                    <div class="col-md-1 d-flex justify-content-center">
                         <button class="btn btn-sm btn-danger" onclick="removeItem(this)"> <i class="far fa-trash-alt fa-lg"></i></button>
                     </div>
+                    @endif
                 </fieldset>
             @endforeach
         @else
@@ -78,16 +80,13 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Quantidade:</label>
                 <input class="form-control" type="text" name="quantities[]">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Valor unitário (R$):</label>
                 <input class="form-control value" type="text" name="values[]">
-            </div>
-            <div class="col-md-2 d-flex justify-content-center">
-                <button class="btn btn-sms btn-danger"><i class="far fa-trash-alt fa-lg"></i></button>
             </div>
         </fieldset>
         @endif
@@ -109,7 +108,8 @@
         })
 
         function addProduct() {
-            html = `<div class="col-md-4">
+            html = ` <fieldset class="form-row border justify-content-center align-items-start my-2 py-2 rounded">
+            <div class="col-md-4">
             <label>Nome:</label>
             <select class="form-control" name="idProducts[]">
                 <option selected>...</option>
@@ -122,10 +122,14 @@
             <label>Quantidade:</label>
             <input class="form-control" type="text" name="quantities[]">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label>Valor unitário (R$):</label>
             <input class="form-control value" type="text" name="values[]">
-        </div>`
+        </div>
+        <div class="col-md-1 d-flex justify-content-center">
+                <button class="btn btn-sm btn-danger"><i class="far fa-trash-alt fa-lg"></i></button>
+            </div>
+        </fieldset>`
 
             $('#products').append(html)
             $('input.value').maskMoney({
