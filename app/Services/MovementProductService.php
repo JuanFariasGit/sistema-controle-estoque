@@ -14,8 +14,8 @@ class MovementProductService
 
     public function __construct(
         ProductRepository $productRepository,
-        MovementRepository $movementRepository)
-    {
+        MovementRepository $movementRepository
+    ) {
         $this->productRepository = $productRepository;
         $this->movementRepository = $movementRepository;
     }
@@ -23,7 +23,7 @@ class MovementProductService
     public function validate($idProducts, $quantities, $values)
     {
         for ($i = 0; $i < count($idProducts); $i++) {
-            $values[$i] = str_replace(',', '.', $values[$i]);
+            $values[$i] = str_replace(',', '.', str_replace('.', '', $values[$i]));
 
             $input = ['product_id' => $idProducts[$i], 'quantity' => $quantities[$i], 'value' => $values[$i]];
 
@@ -42,18 +42,20 @@ class MovementProductService
     public function createOrUpdate($movementId, $productsId, $quantities, $values)
     {
         $movement = $this->movementRepository->findById($movementId);
-        $movementProducts = [];
+        $movement->products()->sync([]);
 
         for ($i = 0; $i < count($quantities); $i++) {
-            $values[$i] = str_replace(',', '.', $values[$i]);
+            $values[$i] = str_replace(',', '.', str_replace('.', '', $values[$i]));
 
-            $movementProducts[$productsId[$i]] = [
-                'quantity' => $quantities[$i],
-                'value' => floatval($values[$i])
-            ];
+            $movement->products()->attach(
+                [
+                    $productsId[$i] => [
+                        'quantity' => $quantities[$i],
+                        'value' => floatval($values[$i])
+                    ]
+                ]
+            );
         }
-
-        $movement->products()->sync($movementProducts);
 
         CurrentStockEvent::dispatch($movement);
     }
