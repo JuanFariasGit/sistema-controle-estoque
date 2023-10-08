@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\CurrentStockEvent;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\ProductRepository;
 use App\Repositories\MovementRepository;
 use Illuminate\Support\Facades\Validator;
@@ -41,22 +42,26 @@ class MovementProductService
 
     public function createOrUpdate($movementId, $productsId, $quantities, $values)
     {
-        $movement = $this->movementRepository->findById($movementId);
-        $movement->products()->sync([]);
+        DB::transaction(function () use ($movementId, $productsId, $quantities, $values) {
+            $movement = $this->movementRepository->findById($movementId);
+            $products = $movement->products();
+            $products->sync([]);
 
-        for ($i = 0; $i < count($quantities); $i++) {
-            $values[$i] = str_replace(',', '.', str_replace('.', '', $values[$i]));
+            for ($i = 0; $i < count($quantities); $i++) {
+                $values[$i] = str_replace(',', '.', str_replace('.', '', $values[$i]));
 
-            $movement->products()->attach(
-                [
-                    $productsId[$i] => [
-                        'quantity' => $quantities[$i],
-                        'value' => floatval($values[$i])
+                $products->attach(
+                    [
+                        $productsId[$i] => [
+                            'quantity' => $quantities[$i],
+                            'value' => floatval($values[$i])
+                        ]
                     ]
-                ]
-            );
-        }
+                );
+            }
 
-        CurrentStockEvent::dispatch($movement);
+            CurrentStockEvent::dispatch($movement);
+        });
+
     }
 }
